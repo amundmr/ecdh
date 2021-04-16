@@ -4,7 +4,7 @@ edch provides easy solutions for simple handling of electrochemical data. Most e
 ## Features:
 - Galvanostatic Cycling
     - Plot Charge/Discharge curves over cycle life
-        - Range, specific or all cycles can be plotted in addition to trimming of the first $x$ cycles.
+        - Range, specific or all cycles can be plotted in addition to trimming of the first *x* cycles.
     - Plot Capacity retention over cycle life
     - Plot dQ/dV
     - Plot data from any number of input files
@@ -17,4 +17,3 @@ edch provides easy solutions for simple handling of electrochemical data. Most e
 - Neware export as general report (.csv)
 - Biologic (.mpt)
 - Batsmall (.dat)
-
