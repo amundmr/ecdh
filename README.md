@@ -77,3 +77,9 @@ Which yields the following output:
 If I now enter the *ecdh.toml* file and set *dqdvplot = true*, *qcplot = false* and remove the entry of the ugly files, The output is:
 
 ![](example_dqdv.png)
+
+## TODO list
+
+- Enable specific cycles on a per-file basis
+- Add Withaker-despiker smoothing algorithm to dQ/dV data
+- Make dQ/dV and V/Q plot in the same figure if both are to be plotted 
