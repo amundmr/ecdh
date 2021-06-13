@@ -31,12 +31,17 @@ class Plot:
         #print(self.percentage)
         
         # Finding number of subplots
-        if self.qcplot == True and self.vqplot == False:
+        if self.qcplot == True:
             self.subplots = 1
-        elif self.qcplot == True and self.vqplot == True:
-            self.subplots = 1 + numfiles
-        elif self.qcplot == False and self.vqplot == True:
-            self.subplots = numfiles
+        else:
+            self.subplots = 0
+        
+        if self.vqplot == True:
+            self.subplots += numfiles
+        
+        if self.dqdvplot == True:
+            self.subplots += numfiles
+
 
         
         # List of available colors
@@ -50,7 +55,7 @@ class Plot:
             self.axes = self.axes.reshape(-1)
         else:
             self.fig, self.axes = plt.subplots(nrows = self.subplots)
-        self.fig.suptitle(self.suptitle + " " + str(date.today()))
+        self.fig.suptitle(str(date.today()))
         try:
             iter(self.axes)
         except:
@@ -61,7 +66,7 @@ class Plot:
             title = 'Generic subplot title',
             ylabel = 'Potential [V]',
             xlabel = 'Specific Capacity [mAh/g]',
-            #ylim = (2.9,5.2),
+            #ylim = (2.5,5),
             #xlim = (0, 150),
             #xticks = (np.arange(0, 150), step=20)),
             #yticks = (np.arange(3, 5, step=0.2)),
@@ -97,6 +102,8 @@ class Plot:
             handles, labels = self.axes[0].get_legend_handles_labels()
             handles.append(Line2D([0], [0], marker='o', color='black', alpha = 0.2, label = 'Charge capacity', linestyle=''))
             self.axes[0].legend(handles=handles)
+            if type(self.specific_cycles) != bool:
+                self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
             # Title also has to be adjusted
         
         # Makes more space.
@@ -120,6 +127,10 @@ class Plot:
         self.colors = self.colors[1:]
         return give_color
 
+    def cycle_color(self, ncycle):
+        colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+        return colors[self.specific_cycles.index(ncycle)]
+
     def colormap(self, color):
         color_hsv = np.asarray(mcolors.rgb_to_hsv(mcolors.to_rgb(color)))
         color_start = color_hsv.copy()
@@ -140,5 +151,3 @@ class Plot:
         colors = colors/255
         self.cmap = mpl.colors.LinearSegmentedColormap.from_list('colormap', colors)
         return self.cmap
-
-
