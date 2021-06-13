@@ -8,7 +8,7 @@ from utils import simplify
 """
 # Cell class specifications
 1st argument = <string> // Path of file to be plotted
-2nd argument = <float>  // Active mass of whatever the data is made on
+2nd argument = <string> // Active mass of whatever the data is made on
 plot = <plot> object    // Describes which plot object to use. Normally this is the one specified above
 start_cut = <int>       // Cuts specified number of cycles off the start of the data
 """
@@ -16,7 +16,7 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 class Cell:
     def __init__(self, filename, am_mass, plot = None, start_cut = 0):
         self.fn = filename
-        self.am_mass = am_mass
+        self.am_mass = float(am_mass)
         self.color = plot.get_color()
         self.name = os.path.basename(filename).split("_127.0.0")[0]
         self.start_cut = start_cut

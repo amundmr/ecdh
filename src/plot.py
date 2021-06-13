@@ -24,25 +24,18 @@ numfiles = <int>        // Amount of files which is passed in the file list
 """
 
 class Plot:
-    def __init__(self, 
-                    percentage = False,
-                    qcplot = True, 
-                    vqplot = True,
-                    suptitle = 'Capacity retention',
-                    ylabel = 'Specific capacity [mAh/g]',
-                    xlabel = "Cycles",
-                    numfiles = 1):
-        self.percentage = percentage
-        self.qcplot = qcplot
-        self.vqplot = vqplot
+    def __init__(self, numfiles = 1, **kwargs):
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
         self.taken_subplots = 0
+        #print(self.percentage)
         
         # Finding number of subplots
-        if qcplot == True and vqplot == False:
+        if self.qcplot == True and self.vqplot == False:
             self.subplots = 1
-        elif qcplot == True and vqplot == True:
+        elif self.qcplot == True and self.vqplot == True:
             self.subplots = 1 + numfiles
-        elif qcplot == False and vqplot == True:
+        elif self.qcplot == False and self.vqplot == True:
             self.subplots = numfiles
 
         
@@ -57,7 +50,7 @@ class Plot:
             self.axes = self.axes.reshape(-1)
         else:
             self.fig, self.axes = plt.subplots(nrows = self.subplots)
-        self.fig.suptitle(str(date.today()))
+        self.fig.suptitle(self.suptitle + " " + str(date.today()))
         try:
             iter(self.axes)
         except:
@@ -76,7 +69,7 @@ class Plot:
             ax.tick_params(direction='in', top = 'true', right = 'true')
 
         # If cycle life is to be plotted: Make the first subplot this.
-        if qcplot == True:
+        if self.qcplot == True:
             self.taken_subplots +=1
             # Dealing with percentage
             if self.percentage == True:
