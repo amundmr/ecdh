@@ -18,7 +18,7 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 class Cell:
     def __init__(self, filename, am_mass, plot = None, start_cut = 0):
         self.fn = filename
-        self.am_mass = am_mass
+        self.am_mass = float(am_mass)
         self.color = plot.get_color()
         self.name = os.path.basename(filename)
         self.start_cut = start_cut
@@ -31,6 +31,7 @@ class Cell:
     def auto_run(self):
         # Check input file and create proper data thereafter
         fn, ext = os.path.splitext(self.fn)
+        info("Reading file: '"+self.fn +"'")
         if ext == ".xlsx":
             self.charges, self.discharges = read_xlsx(self.fn)
         elif ext == ".csv":
@@ -47,11 +48,14 @@ class Cell:
             exit()
 
         # Trimming cycles
-        if self.start_cut > len(self.discharges):
+        if self.start_cut > len(self.discharges) or self.start_cut > len(self.charges):
             warn(f"Start cut is set to {self.start_cut} but the number of discharges is only {len(self.discharges)}. Cuts will not be made.")
         else:
             self.discharges = self.discharges[self.start_cut:]
             self.charges = self.charges[self.start_cut:]
+
+        #print(self.charges)
+        #print(self.discharges)
 
         # Plot it
         if self.plot.qcplot == True:
@@ -66,7 +70,6 @@ class Cell:
 
     def plot_cyclelife(self, plot):
         chgs, dischgs = simplify(self.charges, self.discharges) # Simplifies nested list to just capacities (and removes unwanted start cycles)
-
         norm_fact = dischgs[0]
         if plot.percentage == True: #Normalize capacities on the first cycle.
             dischgs /= norm_fact

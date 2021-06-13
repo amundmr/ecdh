@@ -192,7 +192,7 @@ def mpt_biologic_to_vq_old(filepath):
 
 def mpt_biologic_to_vq(filepath):
     import numpy as np
-    with open(filepath, 'r') as f:#open the filepath for the mpt file
+    with open(filepath, 'r', encoding= "iso-8859-1") as f:#open the filepath for the mpt file
         lines = f.readlines()
 
     # now we skip all the data in the start and jump straight to the dense data
@@ -205,7 +205,7 @@ def mpt_biologic_to_vq(filepath):
     for line in lines:
         if "Characteristic mass :" in line:
             active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
-            print("Active mass found in file to be: " + str(active_mass) + "g")
+            info("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
     #Ox/red-col = 1
@@ -238,7 +238,7 @@ def mpt_biologic_to_vq(filepath):
             oldcap += I_cur * timedelta
 
         else:
-            print("End-Halfcycle-triggered")
+            #print("End-Halfcycle-triggered")
             if oldox == 1: #Charge cycle
                 charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
             elif oldox == 0: #Discharge cycle
@@ -267,10 +267,10 @@ def mpt_biologic_to_vq(filepath):
 
     # Adding the last data to arrays if the file ends
     if oldox == 1: #Charge cycle
-        print("EOF- with a Charge")
+        info("Datafile ended with a Charge")
         charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
     elif oldox == 0: #Discharge cycle
-        print("EOF- with a Discharge")
+        info("Datafile ended with a Discharge")
         discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
 
     return charges, discharges  
@@ -392,13 +392,13 @@ def dat_batsmall_to_vq(filename):
             capacities.append(q)
         except:
             if '"V";I:"A";C:"Ah/kg"' in line and charge == True:
-                print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
+                #print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
                 charges.append((np.array(voltages), np.array(capacities)))
                 charge = False
                 voltages = []
                 capacities = []
             elif '"V";I:"A";C:"Ah/kg"' in line and charge == False:
-                print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
+                #print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
                 discharges.append((np.array(voltages), np.array(capacities)))
                 charge = True
                 voltages = []

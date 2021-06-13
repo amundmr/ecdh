@@ -56,9 +56,15 @@ def simplify(chg, dchg):
     charges = np.zeros(len(chg))
     discharges = np.zeros(len(dchg))
     for i, cycle in enumerate(chg):
-        charges[i] = cycle[1][-1]
+        try:
+            charges[i] = cycle[1][-1]
+        except:
+            charges[i] = 0
     for i, cycle in enumerate(dchg):
-        discharges[i] = cycle[1][-1]
+        try:
+            discharges[i] = cycle[1][-1]
+        except:
+            discharges[i] = 0
     return charges, discharges
 
 def make_dQdV(chg, dchg, nbins = 200):

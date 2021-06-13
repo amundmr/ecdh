@@ -20,7 +20,7 @@ def run():
 
     # Run the data reading + plot generation
     for f in files:
-        Cell(f[0], f[1], plot=plot, start_cut = 40)
+        Cell(f[0], f[1], plot=plot, start_cut = 0)
 
 
     plot.draw()
