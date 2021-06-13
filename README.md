@@ -1,6 +1,3 @@
-# WARNING
-*This sofware is not complete, and at the moment not functioning*
-
 # ecdh - ElectroChemical Data Handling
 
 edch provides easy solutions for simple handling of electrochemical data. Most emphasis is so far put on how to display the data using matplotlib.
