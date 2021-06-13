@@ -1,7 +1,7 @@
 import os as os
 import matplotlib.pyplot as plt
 
-from readers import csv_neware_to_vq, xlsx_neware_to_vq
+from readers import csv_neware_to_vq, dat_batsmall_to_vq, xlsx_neware_to_vq
 from utils import simplify
 
 
@@ -31,7 +31,9 @@ class Cell:
         if ext == ".xlsx":
             self.charges, self.discharges = xlsx_neware_to_vq(self.fn)
         elif ext == ".csv":
-            self.charges, self.discharges = csv_neware_to_vq(self.fn) #but this gives nested list with V/q data for each cycle.
+            self.charges, self.discharges = csv_neware_to_vq(self.fn)
+        elif ext == ".dat":
+            self.charges, self.discharges = dat_batsmall_to_vq(self.fn)
 
         # Plot it
         if self.plot.qcplot == True:

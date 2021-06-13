@@ -1,22 +1,27 @@
-def csv_neware_to_vq(filepath):
+from utils import *
+
+def csv_neware_to_vq(filename):
     import numpy as np
-    f = open(filepath, 'r')
-    #Read the first 2 lines which doesnt contain any data
-    for i in range(2):
-        f.readline()
 
-    #Find what columns have our data
-    Labels = f.readline().split(",") #Save the line of labels of which we are interested in
-    V_col = 0
-    mAh_col = 0
-    for i,label in enumerate(Labels):
-        if "Voltage(V)" in label:
-            V_col = i
-        if "Capacity(mAh)" in label:
-            mAh_col = i
+    info("Reading file: "+filename)
+    with open(filename, 'r') as f:
+        #Read the first 2 lines which doesnt contain any data
+        for i in range(2):
+            f.readline()
 
-    #Read rest of data as list of lines
-    data = f.readlines()
+        #Find what columns have our data
+        Labels = f.readline().split(",") #Save the line of labels of which we are interested in
+        V_col = 0
+        mAh_col = 0
+        for i,label in enumerate(Labels):
+            if "Voltage(V)" in label:
+                V_col = i
+            if "Capacity(mAh)" in label:
+                mAh_col = i
+
+        #Read rest of data as list of lines
+        data = f.readlines()
+
     #Index where in the file charges and discharges occur
     Chg_indxs = []
     DChg_indxs = []
@@ -173,3 +178,71 @@ def mpt_biologic_to_vq(filepath):
 
     return Ewe_arr, Q_chg_dischg_arr, ox_red, list_of_cycleindexes, list_of_reversalindexes
 
+
+def dat_batsmall_to_vq(filename):
+    info("Reading file: "+filename)
+    import numpy as np
+    data = []
+    decode_errors = 0
+    decode_error_str = ""
+    with open(filename, 'r') as f:
+        # Skip past all non-data lines
+        while True:
+            try:
+                line = f.readline()
+            except:
+                continue
+
+            if '"V";I:"A";C:"Ah/kg";7' in line:
+                break
+        # Adding the rest of the readable file to a data array
+        while True:
+            try:
+                line = f.readline()
+                if line == '':
+                    break
+                else:
+                    data.append(line)
+            except UnicodeDecodeError as e:
+                decode_errors += 1
+                decode_error_str = e
+                continue
+        
+        if decode_errors > 0:
+            warn("Found %i Unicode Decode errors, thus %i lines of data has been missed. Consider getting a safer method of acquiring data. \nComplete error message: " %(decode_errors, decode_errors) + str(decode_error_str))
+
+
+
+    charges = []
+    discharges = []
+    charge = True
+    voltages = []
+    capacities = []
+
+
+    for line in data[:-1]:
+        #print(line.split(";"))
+        try:
+            v = float(eval(line.split(";")[1]))
+            q = abs(float(eval(line.split(";")[3])))
+            voltages.append(v)
+            capacities.append(q)
+        except:
+            if '"V";I:"A";C:"Ah/kg"' in line and charge == True:
+                #print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
+                charges.append((np.array(voltages), np.array(capacities)))
+                charge = False
+                voltages = []
+                capacities = []
+            elif '"V";I:"A";C:"Ah/kg"' in line and charge == False:
+                #print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
+                discharges.append((np.array(voltages), np.array(capacities)))
+                charge = True
+                voltages = []
+                capacities = []
+
+        
+    
+    #print(charges)
+    #print(discharges)
+    return charges, discharges
