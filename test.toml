@@ -1,6 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-    ["./testdata/TiO2_on_Si.mpt", "0.01"],
+    ["./testdata/batsmall_data.dat", "1"],
 ]
 
 [settings]
