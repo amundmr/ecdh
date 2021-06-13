@@ -2,7 +2,7 @@ import os as os
 import matplotlib.pyplot as plt
 
 from readers import csv_neware_to_vq, dat_batsmall_to_vq, xlsx_neware_to_vq
-from utils import simplify
+from utils import *
 
 
 """
@@ -15,14 +15,18 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 
 class Cell:
     def __init__(self, filename, am_mass, plot = None, start_cut = 0):
+        # Check if datafile exist before doing anything
+        
         self.fn = filename
         self.am_mass = float(am_mass)
         self.color = plot.get_color()
-        self.name = os.path.basename(filename).split("_127.0.0")[0]
+        self.name = os.path.basename(filename)
         self.start_cut = start_cut
         self.plot = plot
 
         self.auto_run()
+
+        
 
 
     def auto_run(self):
