@@ -1,7 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-    ["./testdata/8_LA05NMO_E1_C2_RC.dat", "0.01"],
-    ["./testdsata/RVT_LFCO_75.csv", "0.01"],
+    ["./testdata/TiO2_on_Si.mpt", "0.01"],
 ]
 
 [settings]

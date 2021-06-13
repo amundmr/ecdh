@@ -127,60 +127,94 @@ def xlsx_neware_to_vq(filename):
 
 
 def mpt_biologic_to_vq(filepath):
-    f = open(filepath, 'r') #open the filepath for the mpt file
+    import numpy as np
+
+    with open(filepath, 'r', encoding = "iso-8859-1") as f: #open the filepath for the mpt file
+        lines = f.readlines()
+
     # now we skip all the data in the start and jump straight to the dense data
     headerlines = 0
-    for line in f:
+    for line in lines:
         if "Nb header lines :" in line:
             headerlines = int(line.split(':')[-1])
             break #breaks for loop when headerlines is found
     
-    for line in f:
+    for line in lines:
         if "Characteristic mass :" in line:
             active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
-            print("Active mass found in file to be: " + str(active_mass) + "g")
+            info("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
-    #Skip all headerlines
-    for i in range(headerlines):
-        f.readline()
+    #Ox/red-col = 1
+    #Ewe-col = 9
+    #Cap-col = 17
+    #Cyc-col = -2
+    #Cur-col = 10
+    #time-col = 7
+    charges = []
+    discharges = []
+    newox = False
+    oldox = eval(lines[headerlines].split()[1])
+    oldcap = 0
+    t_prev = 0
+    t_cycstart = 0
+    tmp_cyc_E = []
+    tmp_cyc_C = []
+    Cap_cum = []
+    for line in lines[headerlines:]:
+        if oldox == eval(line.split()[1]):
+            tmp_cyc_E.append(eval(line.split()[9]))
+            tmp_cyc_C.append(eval(line.split()[17]))
+            
+            #Manual capacity calculation
+            I_cur = eval(line.split()[10])
+            t_cur = eval(line.split()[7])/3600 - t_cycstart
+            timedelta = t_cur - t_prev
+            Cap_cum.append(abs(oldcap + I_cur * timedelta))
+            t_prev = t_cur
+            oldcap += I_cur * timedelta
 
+        else:
+            #print("End-Halfcycle-triggered")
+            if oldox == 1: #Charge cycle
+                charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+            elif oldox == 0: #Discharge cycle
+                discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
+            
+            # Resetting the temporary lists
+            tmp_cyc_E = []
+            tmp_cyc_C = []
+            Cap_cum = []
+            t_prev = 0
+            oldcap = 0
+            # Setting the new ox status
+            oldox = eval(line.split()[1])
+            # Must remember to add this line's values!
+            tmp_cyc_E.append(eval(line.split()[9]))
+            tmp_cyc_C.append(eval(line.split()[17]))
 
-    #Put all the data in one big list of lines
-    data = f.readlines()
+            t_cycstart = eval(line.split()[7])/3600 # Resetting time of start of cycle
+            #Manual capacity calculation
+            I_cur = eval(line.split()[10])
+            t_cur = eval(line.split()[7])/3600 - t_cycstart
+            timedelta = t_cur - t_prev
+            Cap_cum.append(oldcap + I_cur * timedelta)
+            t_prev = t_cur
+            oldcap += I_cur * timedelta
 
-    #Spawning massive data arrays for Potential, Charge and Cycle num
-    Ewe_arr = np.zeros(len(data))
-    Q_chg_dischg_arr = np.zeros_like(Ewe_arr)
-    Cycle_arr = np.zeros_like(Ewe_arr)
-    ox_red = np.zeros_like(Ewe_arr)
+    # Adding the last data to arrays if the file ends
+    if oldox == 1: #Charge cycle
+        info("Datafile ended with a Charge")
+        charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+    elif oldox == 0: #Discharge cycle
+        info("Datafile ended with a Discharge")
+        discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
 
-    #Putting all data (potential, capacity, cyclenum) in arrays
-    i=-1
-    for line in data: #Looping over each line in the dense data
-        
-        i+=1
-        line_lst = line.split() #Splitting the line to a list
-        Cycle_arr[i] = int(float(line_lst[-1].replace(',', '.'))) #The integer of the last element on the line as cycle added to array of cycles
-        Ewe_arr[i] = float(line_lst[11].replace(',', '.')) #line elem 11 added to Ewe arr as float
-        Q_chg_dischg_arr[i] = float(line_lst[23].replace(',', '.')) / active_mass
-        ox_red[i] = int(float(line_lst[1].replace(',', '.')))
-        
+    return charges, discharges 
 
-    #Creating list with indexes of new cycle starts
-    list_of_cycleindexes = [0]
-    list_of_reversalindexes = []
-    for i in range(len(Cycle_arr)-1):
-        if Cycle_arr[i]+1 == Cycle_arr[i+1]: #Adding the index where a new cycle starts (stop discharge, start charge)
-            list_of_cycleindexes.append(i+1)
-        if ox_red[i] == ox_red[i+1]+1: #Adding the index where the charge stops and the discharge starts
-            list_of_reversalindexes.append(i+1)
-
-    return Ewe_arr, Q_chg_dischg_arr, ox_red, list_of_cycleindexes, list_of_reversalindexes
 
 
 def dat_batsmall_to_vq(filename):
-    info("Reading file: "+filename)
     import numpy as np
     data = []
     decode_errors = 0
