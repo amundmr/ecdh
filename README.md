@@ -6,6 +6,21 @@
 edch provides easy solutions for simple handling of electrochemical data. Most emphasis is so far put on how to display the data using matplotlib.
 
 
+## Usage:
+
+Run ```src/main.py``` with python3.
+
+Command line arguments:
+**init** initializes a toml file with the name *ecdh.toml*. Any supported datafiles in the local directory will be added to it.
+**run config.toml** runs with the configuration set in config.toml
+
+Example use:
+```
+python3 src/main.py init
+python3 src/main.py run ecdh.toml 
+```
+
+
 ## Features:
 
 - Galvanostatic Cycling
