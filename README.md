@@ -11,8 +11,9 @@ edch provides easy solutions for simple handling of electrochemical data. Most e
 Run ```src/main.py``` with python3.
 
 Command line arguments:
-**init** initializes a toml file with the name *ecdh.toml*. Any supported datafiles in the local directory will be added to it.
-**run config.toml** runs with the configuration set in config.toml
+
+- **init** initializes a toml file with the name *ecdh.toml*. Any supported datafiles in the local directory will be added to it.
+- **run config.toml** runs with the configuration set in config.toml
 
 Example use:
 ```
