@@ -54,3 +54,29 @@ Custom Packages:
 - Matplotlib
 - Numpy
 - toml
+
+
+## Examples
+
+I have three datafiles from different equipment, but since they are all in the same folder, I can initiate a config file with the *init* command, and run it afterwords with *run ecdh.toml*.
+
+The terminal looks like:
+
+```
+$ python3 ../src/main.py init
+[INFO] Wrote example configuration to 'ecdh.toml' with 3
+       files found
+$ python3 ../src/main.py run ecdh.toml 
+[INFO] Reading file: 'Neware_commasep.csv'
+[INFO] Reading file: 'Biologic-text.mpt'
+[INFO] Active mass found in file to be: 1e-06g
+[INFO] Datafile ended with a Discharge
+[INFO] Reading file: 'batsmall_data.dat'
+```
+
+Which yields the following output:
+![](example_multiplot.png)
+
+If I now enter the *ecdh.toml* file and set *dqdvplot = true*, *qcplot = false* and remove the entry of the ugly files, The output is:
+
+![](example_dqdv.png)
