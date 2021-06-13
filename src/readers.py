@@ -1,10 +1,9 @@
 from utils import *
 
-def csv_neware_to_vq(filename):
+def read_csv(filepath):
     import numpy as np
-
-    info("Reading file: "+filename)
-    with open(filename, 'r') as f:
+    #Open file
+    with open(filepath, 'r', encoding = "ISO-8859-1") as f:
         #Read the first 2 lines which doesnt contain any data
         for i in range(2):
             f.readline()
@@ -21,7 +20,7 @@ def csv_neware_to_vq(filename):
 
         #Read rest of data as list of lines
         data = f.readlines()
-
+    
     #Index where in the file charges and discharges occur
     Chg_indxs = []
     DChg_indxs = []
@@ -83,7 +82,7 @@ def csv_neware_to_vq(filename):
     return charges, discharges
 
 
-def xlsx_neware_to_vq(filename):
+def read_xlsx(filename):
     import openpyxl as px
     import numpy as np
 
@@ -126,10 +125,74 @@ def xlsx_neware_to_vq(filename):
     return charges, discharges
 
 
+def mpt_biologic_to_vq_old(filepath):
+    import numpy as np
+    f = open(filepath, 'r') #open the filepath for the mpt file
+    # now we skip all the data in the start and jump straight to the dense data
+    headerlines = 0
+    for line in f:
+        if "Nb header lines :" in line:
+            headerlines = int(line.split(':')[-1])
+            break #breaks for loop when headerlines is found
+    
+    for line in f:
+        if "Characteristic mass :" in line:
+            active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
+            print("Active mass found in file to be: " + str(active_mass) + "g")
+            break #breaks loop when active mass is found
+
+    #Skip all headerlines
+    for i in range(headerlines):
+        f.readline()
+
+
+    #Put all the data in one big list of lines
+    data = f.readlines()
+
+    #Spawning massive data arrays for Potential, Charge and Cycle num
+    Ewe_arr = np.zeros(len(data))
+    Q_chg_dischg_arr = np.zeros_like(Ewe_arr)
+    Cycle_arr = np.zeros_like(Ewe_arr)
+    ox_red = np.zeros_like(Ewe_arr)
+
+    #Putting all data (potential, capacity, cyclenum) in arrays
+    i=-1
+    for line in data: #Looping over each line in the dense data
+        
+        i+=1
+        line_lst = line.split() #Splitting the line to a list
+        Cycle_arr[i] = int(float(line_lst[-2].replace(',', '.'))) #The integer of the last element on the line as cycle added to array of cycles
+        Ewe_arr[i] = float(line_lst[11].replace(',', '.')) #line elem 11 added to Ewe arr as float
+        Q_chg_dischg_arr[i] = float(line_lst[19].replace(',', '.')) / active_mass
+        ox_red[i] = int(float(line_lst[1].replace(',', '.')))
+        
+
+    #Creating list with indexes of new cycle starts
+    list_of_cycleindexes = [0]
+    list_of_reversalindexes = []
+    for i in range(len(Cycle_arr)-1):
+        if Cycle_arr[i]+1 == Cycle_arr[i+1]: #Adding the index where a new cycle starts (stop discharge, start charge)
+            list_of_cycleindexes.append(i+1)
+        if ox_red[i] == ox_red[i+1]+1: #Adding the index where the charge stops and the discharge starts
+            list_of_reversalindexes.append(i+1)
+
+    charges = []
+    discharges = []
+    indx = list_of_cycleindexes
+    [indx.append(i) for i in list_of_reversalindexes]
+    indx.sort()
+
+    for i in range(len(indx) - 1):
+        if (i%2) == 0: #even index: charge cycle
+            charges.append((Ewe_arr[indx[i]:indx[i+1]], Q_chg_dischg_arr[indx[i]:indx[i+1]])) #Inserting tuple of two arrays sliced to be one cycle of voltages and capacities.
+        else: #then discharge
+            discharges.append((Ewe_arr[indx[i]:indx[i+1]], Q_chg_dischg_arr[indx[i]:indx[i+1]]))
+    return charges, discharges
+    
+
 def mpt_biologic_to_vq(filepath):
     import numpy as np
-
-    with open(filepath, 'r', encoding = "iso-8859-1") as f: #open the filepath for the mpt file
+    with open(filepath, 'r') as f:#open the filepath for the mpt file
         lines = f.readlines()
 
     # now we skip all the data in the start and jump straight to the dense data
@@ -142,7 +205,7 @@ def mpt_biologic_to_vq(filepath):
     for line in lines:
         if "Characteristic mass :" in line:
             active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
-            info("Active mass found in file to be: " + str(active_mass) + "g")
+            print("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
     #Ox/red-col = 1
@@ -175,7 +238,7 @@ def mpt_biologic_to_vq(filepath):
             oldcap += I_cur * timedelta
 
         else:
-            #print("End-Halfcycle-triggered")
+            print("End-Halfcycle-triggered")
             if oldox == 1: #Charge cycle
                 charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
             elif oldox == 0: #Discharge cycle
@@ -204,29 +267,97 @@ def mpt_biologic_to_vq(filepath):
 
     # Adding the last data to arrays if the file ends
     if oldox == 1: #Charge cycle
+        print("EOF- with a Charge")
+        charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+    elif oldox == 0: #Discharge cycle
+        print("EOF- with a Discharge")
+        discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
+
+    return charges, discharges  
+
+
+def custom_EC_export(filepath):
+    import numpy as np
+    with open(filepath, 'r') as f: #open the filepath for the mpt file
+        f.readline()
+        lines = f.readlines()
+
+    #Ox/red-col = 1
+    #Ewe-col = 4
+    #Cap-col = 5
+    #Cyc-col = 0
+    #Cur-col = 3
+    #time-col = 2
+    charges = []
+    discharges = []
+    newox = False
+    oldox = eval(lines[0].split()[1])
+    oldcap = 0
+    t_prev = 0
+    t_cycstart = 0
+    tmp_cyc_E = []
+    tmp_cyc_C = []
+    Cap_cum = []
+    for line in lines:
+        if oldox == eval(line.split()[1]):
+            tmp_cyc_E.append(eval(line.split()[4]))
+            tmp_cyc_C.append(eval(line.split()[5]))
+            
+            #Manual capacity calculation
+            I_cur = eval(line.split()[3])
+            t_cur = eval(line.split()[2])/3600 - t_cycstart
+            timedelta = t_cur - t_prev
+            Cap_cum.append(abs(oldcap + I_cur * timedelta))
+            t_prev = t_cur
+            oldcap += I_cur * timedelta
+
+        else:
+            #print("End-Halfcycle-triggered")
+            if oldox == 1: #Charge cycle
+                charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+            elif oldox == 0: #Discharge cycle
+                discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
+            
+            # Resetting the temporary lists
+            tmp_cyc_E = []
+            tmp_cyc_C = []
+            Cap_cum = []
+            t_prev = 0
+            oldcap = 0
+            # Setting the new ox status
+            oldox = eval(line.split()[1])
+            # Must remember to add this line's values!
+            tmp_cyc_E.append(eval(line.split()[4]))
+            tmp_cyc_C.append(eval(line.split()[5]))
+
+            t_cycstart = eval(line.split()[2])/3600 # Resetting time of start of cycle
+            #Manual capacity calculation
+            I_cur = eval(line.split()[3])
+            t_cur = eval(line.split()[2])/3600 - t_cycstart
+            timedelta = t_cur - t_prev
+            Cap_cum.append(oldcap + I_cur * timedelta)
+            t_prev = t_cur
+            oldcap += I_cur * timedelta
+
+    # Adding the last data to arrays if the file ends
+    if oldox == 1: #Charge cycle
         info("Datafile ended with a Charge")
         charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
     elif oldox == 0: #Discharge cycle
         info("Datafile ended with a Discharge")
         discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
 
-    return charges, discharges 
-
-
+    return charges, discharges  
 
 def dat_batsmall_to_vq(filename):
     import numpy as np
     data = []
     decode_errors = 0
     decode_error_str = ""
-    with open(filename, 'r') as f:
-        # Skip past all non-data lines
+    with open(filename, "r") as f:
+        # Skip all non-data lines
         while True:
-            try:
-                line = f.readline()
-            except:
-                continue
-
+            line = f.readline()
             if '"V";I:"A";C:"Ah/kg";7' in line:
                 break
         # Adding the rest of the readable file to a data array
@@ -246,13 +377,11 @@ def dat_batsmall_to_vq(filename):
             warn("Found %i Unicode Decode errors, thus %i lines of data has been missed. Consider getting a safer method of acquiring data. \nComplete error message: " %(decode_errors, decode_errors) + str(decode_error_str))
 
 
-
     charges = []
     discharges = []
     charge = True
     voltages = []
     capacities = []
-
 
     for line in data[:-1]:
         #print(line.split(";"))
@@ -263,13 +392,13 @@ def dat_batsmall_to_vq(filename):
             capacities.append(q)
         except:
             if '"V";I:"A";C:"Ah/kg"' in line and charge == True:
-                #print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
+                print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
                 charges.append((np.array(voltages), np.array(capacities)))
                 charge = False
                 voltages = []
                 capacities = []
             elif '"V";I:"A";C:"Ah/kg"' in line and charge == False:
-                #print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
+                print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
                 discharges.append((np.array(voltages), np.array(capacities)))
                 charge = True
                 voltages = []
