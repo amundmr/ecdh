@@ -45,7 +45,6 @@ Standard Packages:
 - sys
 - datetime
 - math
-- textwrap
 
 Custom Packages:
 - Matplotlib
