@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+
+"""This file is ran when user calls ecdh"""
+from log import LOG
+
+from readers import check_files
+
 from make_toml import make_toml
 from plot import *
 from cell import *
@@ -12,7 +19,7 @@ def run():
 
     # Check that files are found
     files = check_files(config["files"])
-
+    LOG.success("Running ECDH: Found {} datafiles!".format(len(files)))
 
     # Define plot specifications
     plot = Plot(numfiles=len(files), **config["settings"])

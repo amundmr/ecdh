@@ -1,0 +1,1 @@
+"""If fastdiff is imported as a module, then this file will be ran"""

@@ -1,5 +1,5 @@
 import os
-from utils import *
+from __main__ import LOG
 
 def make_toml(folder):
     files = []
@@ -19,7 +19,7 @@ files = [\n"""
         for file in files:
             toml_str += '\t["' + file + '","1.0"],\n'
     else:
-        warn("Could not find any files in the current folder!")
+        LOG.warning("Could not find any files in the current folder!")
         toml_str += '\t[" ","1.0"],\n'
 
     toml_str += """]

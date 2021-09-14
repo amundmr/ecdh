@@ -1,8 +1,10 @@
 import os as os
 import matplotlib.pyplot as plt
 
-from readers import *
-from utils import *
+from __main__ import LOG
+
+import readers
+import utils
 
 
 """
@@ -29,23 +31,8 @@ class Cell:
 
 
     def auto_run(self):
-        # Check input file and create proper data thereafter
-        fn, ext = os.path.splitext(self.fn)
-        info("Reading file: '"+self.fn +"'")
-        if ext == ".xlsx":
-            self.charges, self.discharges = read_xlsx(self.fn)
-        elif ext == ".csv":
-            self.charges, self.discharges = read_csv(self.fn) #but this gives nested list with V/q data for each cycle.
-        elif ext == ".mpt":
-            self.charges, self.discharges = mpt_biologic_to_vq(self.fn)
-        elif ext == ".dat":
-            self.charges, self.discharges = dat_batsmall_to_vq(self.fn)
-        elif ext == ".customexport":
-            self.charges, self.discharges = custom_EC_export(self.fn)
-        else:
-            error("FILE FORMAT NOT SUPPORTED: " + str(ext))
-            error("EXITING")
-            exit()
+        # Read input file
+        self.charges, self.discharges = readers.read(self.fn)
 
         # Trimming cycles
         if self.start_cut > len(self.discharges) or self.start_cut > len(self.charges):
@@ -69,7 +56,7 @@ class Cell:
 
 
     def plot_cyclelife(self, plot):
-        chgs, dischgs = simplify(self.charges, self.discharges) # Simplifies nested list to just capacities (and removes unwanted start cycles)
+        chgs, dischgs = self.simplify(self.charges, self.discharges) # Simplifies nested list to just capacities (and removes unwanted start cycles)
         norm_fact = dischgs[0]
         if plot.percentage == True: #Normalize capacities on the first cycle.
             dischgs /= norm_fact
@@ -145,3 +132,24 @@ class Cell:
         title =  "dQ/dV: " + os.path.basename(self.fn)
         ax.set_title(title)
         ax.set(ylabel = "Potential [V]", xlabel = "dQ/dV [mAh/Vg]")
+
+    def simplify(self, chg, dchg):
+        # Takes two lists of complete cycle data and returns max capacity for each cycle.
+        # chg = [cycle1, cycle2, cycle3 , ... , cycleN]
+        # cycle1 = [[v1, v2, v3, ..., vn],[q1, q2, q3, ..., qn]]
+        # This func basically just pulls qn from every cycle and creates a new array with it.
+        import numpy as np
+
+        charges = np.zeros(len(chg))
+        discharges = np.zeros(len(dchg))
+        for i, cycle in enumerate(chg):
+            try:
+                charges[i] = cycle[1][-1]
+            except:
+                charges[i] = 0
+        for i, cycle in enumerate(dchg):
+            try:
+                discharges[i] = cycle[1][-1]
+            except:
+                discharges[i] = 0
+        return charges, discharges

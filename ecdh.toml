@@ -1,6 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-	["./testdata/AMR_Pouch_B3_2.mpt","1.0"],
+	["./testdata/newaredata.xlsx","1.0"],
 ]
 
 [settings]
