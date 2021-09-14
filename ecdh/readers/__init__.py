@@ -5,6 +5,7 @@ import readers.Neware as NA
 
 import utils
 import os
+import pandas as pd
 
 def read(filepath):
     """
@@ -13,21 +14,21 @@ def read(filepath):
     fn, ext = os.path.splitext(filepath)
     LOG.debug(f"Reading file: '{filepath}'")
     if ext == ".xlsx":
-        charges, discharges = NA.read_xlsx(filepath)
+        df = NA.read_xlsx(filepath)
     elif ext == ".csv":
-        charges, discharges = NA.read_csv(filepath) #but this gives nested list with V/q data for each cycle.
+        df = NA.read_csv(filepath) #but this gives nested list with V/q data for each cycle.
     elif ext == ".mpt":
-        charges, discharges = BL.mpt_biologic_to_vq(filepath)
+        df = BL.read_mpt(filepath)
     elif ext == ".customexport":
-        charges, discharges = BL.custom_EC_export(filepath)
+        df = BL.custom_EC_export(filepath)
     elif ext == ".dat":
-        charges, discharges = BS.dat_batsmall_to_vq(filepath)
+        df = BS.dat_batsmall_to_vq(filepath)
     else:
         LOG.error(f"File format not supported: {ext}")
         LOG.error("Exiting..")
         exit()
 
-    return charges, discharges
+    return df
 
 
 def check_files(list):
@@ -40,3 +41,4 @@ def check_files(list):
         else:
             LOG.error("File not found: '" + str(filename) + "' Please check that the correct path is typed in your input toml file. Skipping this file.")
     return return_list
+

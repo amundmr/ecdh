@@ -3,6 +3,8 @@ import matplotlib.pyplot as plt
 
 from __main__ import LOG
 
+from pandas.core.frame import DataFrame
+
 import readers
 import utils
 
@@ -18,41 +20,122 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 
 
 class Cell:
-    def __init__(self, filename, am_mass, plot = None, start_cut = 0):
+    def __init__(self, filename, am_mass, plot = None,):
         self.fn = filename
         self.am_mass = float(am_mass)
         self.color = plot.get_color()
         self.name = os.path.basename(filename)
-        self.start_cut = start_cut
-        self.plot = plot
+        self.plotobj = plot
         self.axes = []
+        self.mode_dict = {'1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}
 
-        self.auto_run()
 
-
-    def auto_run(self):
+    def get_data(self):
         # Read input file
-        self.charges, self.discharges = readers.read(self.fn)
+        self.df = readers.read(self.fn)
+        LOG.debug("Data has been read successfully")
 
-        # Trimming cycles
-        if self.start_cut > len(self.discharges) or self.start_cut > len(self.charges):
-            warn(f"Start cut is set to {self.start_cut} but the number of discharges is only {len(self.discharges)}. Cuts will not be made.")
+    def edit_CV(self):
+        if self.df.experiment_mode != 2:
+            LOG.warning("File '{}' is not a CV file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
-            self.discharges = self.discharges[self.start_cut:]
-            self.charges = self.charges[self.start_cut:]
+            num_cycles = self.df['cycle number'].iloc[-1]
+            cycleend = int(len(self.df['Ewe/V'])/num_cycles - 1)
+            dv = self.df['Ewe/V'].iloc[cycleend]- self.df['Ewe/V'].iloc[0]
+            dt = self.df['time/s'].iloc[cycleend]- self.df['time/s'].iloc[0]
+            sweeprate = dv/dt * 1000 
+            LOG.debug("Calculated first cycle sweep rate: {} mV/s.".format(sweeprate))
+            dvdt = self.df[['time/s', 'Ewe/V']]
+            dvdt = dvdt.diff(periods = 1, axis = 0)
+            dvdt = dvdt['Ewe/V'] / dvdt['time/s']
+            print(dvdt.head())
 
-        #print(self.charges)
-        #print(self.discharges)
 
+    def get_chgs_dchgs(self):
+
+        charges = []
+        discharges = []
+        newox = False
+        oldox = eval(lines[headerlines].split()[1])
+        oldcap = 0
+        t_prev = 0
+        t_cycstart = 0
+        tmp_cyc_E = []
+        tmp_cyc_C = []
+        Cap_cum = []
+        for line in lines[headerlines:]:
+            if oldox == eval(line.split()[1]):
+                tmp_cyc_E.append(eval(line.split()[9]))
+                tmp_cyc_C.append(eval(line.split()[17]))
+                
+                #Manual capacity calculation
+                I_cur = eval(line.split()[10])
+                t_cur = eval(line.split()[7])/3600 - t_cycstart
+                timedelta = t_cur - t_prev
+                Cap_cum.append(abs(oldcap + I_cur * timedelta))
+                t_prev = t_cur
+                oldcap += I_cur * timedelta
+
+            else:
+                #print("End-Halfcycle-triggered")
+                if oldox == 1: #Charge cycle
+                    charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+                elif oldox == 0: #Discharge cycle
+                    discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
+                
+                # Resetting the temporary lists
+                tmp_cyc_E = []
+                tmp_cyc_C = []
+                Cap_cum = []
+                t_prev = 0
+                oldcap = 0
+                # Setting the new ox status
+                oldox = eval(line.split()[1])
+                # Must remember to add this line's values!
+                tmp_cyc_E.append(eval(line.split()[9]))
+                tmp_cyc_C.append(eval(line.split()[17]))
+
+                t_cycstart = eval(line.split()[7])/3600 # Resetting time of start of cycle
+                #Manual capacity calculation
+                I_cur = eval(line.split()[10])
+                t_cur = eval(line.split()[7])/3600 - t_cycstart
+                timedelta = t_cur - t_prev
+                Cap_cum.append(oldcap + I_cur * timedelta)
+                t_prev = t_cur
+                oldcap += I_cur * timedelta
+
+        # Adding the last data to arrays if the file ends
+        if oldox == 1: #Charge cycle
+            LOG.debug("Datafile ended with a Charge")
+            charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
+        elif oldox == 0: #Discharge cycle
+            LOG.debug("Datafile ended with a Discharge")
+            discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
+
+        return charges, discharges  
+
+    def treat_data(self, config):
+        LOG.debug("Treating data")
+        if config["start_cut"]:
+            start_cut = int(config["start_cut"])
+            # Trimming cycles
+            if start_cut > len(self.discharges) or self.start_cut > len(self.charges):
+                LOG.warning(f"Start cut is set to {self.start_cut} but the number of discharges is only {len(self.discharges)}. Cuts will not be made.")
+            else:
+                LOG.debug("Cutting off start cycles")
+                self.discharges = self.discharges[self.start_cut:]
+                self.charges = self.charges[self.start_cut:]
+
+    def plot(self):
         # Plot it
-        if self.plot.qcplot == True:
-            self.plot_cyclelife(self.plot)
-        if self.plot.vqplot == True:
-            self.plot_cycles(self.plot)
-        if self.plot.dqdvplot == True:
-            self.plot_dqdv(self.plot)
-        #if self.plot.dqdvplot == True and self.plot.vqplot == True:
-        #    self.plot_cycles_dqdv(self.plot)
+        if self.plotobj.qcplot == True:
+            self.plot_cyclelife(self.plotobj)
+        if self.plotobj.vqplot == True:
+            self.plot_cycles(self.plotobj)
+        if self.plotobj.dqdvplot == True:
+            self.plot_dqdv(self.plplotobjot)
+        #if self.plotobj.dqdvplot == True and self.plotobj.vqplot == True:
+        #    self.plot_cycles_dqdv(self.plotobj)
 
 
     def plot_cyclelife(self, plot):

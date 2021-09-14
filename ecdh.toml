@@ -1,6 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-	["./testdata/newaredata.xlsx","1.0"],
+	["./testdata/HV_LNA05MO_E1_AlClad_LP30_C13.mpt","1.0"],
 ]
 
 [settings]
@@ -12,3 +12,4 @@ specific_cycles = false         # Will make global limit of cycles, can be range
 suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
+start_cut = 0

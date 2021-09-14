@@ -49,6 +49,7 @@ Standard Packages:
 Custom Packages:
 - Matplotlib
 - Numpy
+- Pandas
 - toml
 
 

@@ -2,6 +2,10 @@
 
 from __main__ import LOG
 
+import numpy as np
+import pandas as pd
+
+
 def mpt_biologic_to_vq_old(filepath):
     import numpy as np
     f = open(filepath, 'r') #open the filepath for the mpt file
@@ -67,9 +71,18 @@ def mpt_biologic_to_vq_old(filepath):
     return charges, discharges
     
 
-def mpt_biologic_to_vq(filepath):
-    import numpy as np
-    with open(filepath, 'r', encoding= "iso-8859-1") as f:#open the filepath for the mpt file
+def read_mpt(filepath):
+    """
+    Reads an mpt file to a pandas dataframe
+    
+    .MPT format:
+        mode column: 1=Galvanostatic, 2=Linear Potential Sweep, 3=Rest
+
+    """
+
+    #with open(filepath, 'r', encoding= "iso-8859-1") as f:  #open the filepath for the mpt file
+    #    lines = f.readlines()
+    with open(filepath, 'r') as f:
         lines = f.readlines()
 
     # now we skip all the data in the start and jump straight to the dense data
@@ -85,73 +98,19 @@ def mpt_biologic_to_vq(filepath):
             LOG.debug("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
-    #Ox/red-col = 1
-    #Ewe-col = 9
-    #Cap-col = 17
-    #Cyc-col = -2
-    #Cur-col = 10
-    #time-col = 7
-    charges = []
-    discharges = []
-    newox = False
-    oldox = eval(lines[headerlines].split()[1])
-    oldcap = 0
-    t_prev = 0
-    t_cycstart = 0
-    tmp_cyc_E = []
-    tmp_cyc_C = []
-    Cap_cum = []
-    for line in lines[headerlines:]:
-        if oldox == eval(line.split()[1]):
-            tmp_cyc_E.append(eval(line.split()[9]))
-            tmp_cyc_C.append(eval(line.split()[17]))
-            
-            #Manual capacity calculation
-            I_cur = eval(line.split()[10])
-            t_cur = eval(line.split()[7])/3600 - t_cycstart
-            timedelta = t_cur - t_prev
-            Cap_cum.append(abs(oldcap + I_cur * timedelta))
-            t_prev = t_cur
-            oldcap += I_cur * timedelta
 
-        else:
-            #print("End-Halfcycle-triggered")
-            if oldox == 1: #Charge cycle
-                charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
-            elif oldox == 0: #Discharge cycle
-                discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
-            
-            # Resetting the temporary lists
-            tmp_cyc_E = []
-            tmp_cyc_C = []
-            Cap_cum = []
-            t_prev = 0
-            oldcap = 0
-            # Setting the new ox status
-            oldox = eval(line.split()[1])
-            # Must remember to add this line's values!
-            tmp_cyc_E.append(eval(line.split()[9]))
-            tmp_cyc_C.append(eval(line.split()[17]))
+    big_df = pd.read_csv(filepath, header=headerlines-1, sep="\t")
+    LOG.debug("Dataframe column names: {}".format(big_df.columns))
 
-            t_cycstart = eval(line.split()[7])/3600 # Resetting time of start of cycle
-            #Manual capacity calculation
-            I_cur = eval(line.split()[10])
-            t_cur = eval(line.split()[7])/3600 - t_cycstart
-            timedelta = t_cur - t_prev
-            Cap_cum.append(oldcap + I_cur * timedelta)
-            t_prev = t_cur
-            oldcap += I_cur * timedelta
-
-    # Adding the last data to arrays if the file ends
-    if oldox == 1: #Charge cycle
-        LOG.debug("Datafile ended with a Charge")
-        charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
-    elif oldox == 0: #Discharge cycle
-        LOG.debug("Datafile ended with a Discharge")
-        discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
-
-    return charges, discharges  
-
+    df = big_df[['mode', 'time/s', 'Ewe/V', '<I>/mA', 'cycle number']]
+    # Replace , by . and make numeric from strings. Mode is already interpreted as int.
+    df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
+    df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
+    df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
+    df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
+    df.experiment_mode = 2
+    return df
+    
 
 def custom_EC_export(filepath):
     import numpy as np
@@ -225,4 +184,3 @@ def custom_EC_export(filepath):
         discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
 
     return charges, discharges  
-

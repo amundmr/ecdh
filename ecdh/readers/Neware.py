@@ -1,7 +1,7 @@
 
 """Data-readers for Neware"""
 from __main__ import LOG
-
+LOG.error("NEWARE READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
 def read_csv(filepath):
     LOG.debug(f"Reading Neware CSV: '{filepath}'")
     import numpy as np

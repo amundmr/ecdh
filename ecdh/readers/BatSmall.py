@@ -1,6 +1,6 @@
 """Data-readers for Neware"""
 from __main__ import LOG
-
+LOG.error("BATSMALL READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
 def dat_batsmall_to_vq(filename):
     import numpy as np
     data = []
