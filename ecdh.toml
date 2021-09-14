@@ -1,10 +1,10 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-    ["./testdata/batsmall_data.dat", "1"],
+	["./testdata/AMR_Pouch_B3_2.mpt","1.0"],
 ]
 
 [settings]
-percentage = true              # Wether or not to use percentage in capacity vs cycles plot
+percentage = false              # Wether or not to use percentage in capacity vs cycles plot
 qcplot = true                   # Wether or not to plot capacity vs cycles
 vqplot = true                   # Wether or not to plot voltage versus capacity plot (cycling curves)
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
