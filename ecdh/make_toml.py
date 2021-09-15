@@ -33,8 +33,9 @@ specific_cycles = false         # Will make global limit of cycles, can be range
 suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
+all_in_one = true
 """
 
     with open("ecdh.toml", "w") as f:
         f.write(toml_str)
-        info("Wrote example configuration to 'ecdh.toml' with %.0f files found"%len(files))
+        LOG.info("Wrote example configuration to 'ecdh.toml' with %.0f files found"%len(files))

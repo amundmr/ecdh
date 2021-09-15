@@ -72,14 +72,52 @@ $ python3 ../src/main.py run ecdh.toml
 ```
 
 Which yields the following output:
-![](example_multiplot.png)
+![](doc/example_multiplot.png)
 
 If I now enter the *ecdh.toml* file and set *dqdvplot = true*, *qcplot = false* and remove the entry of the ugly files, The output is:
 
-![](example_dqdv.png)
+![](doc/example_dqdv.png)
 
 ## TODO list
 
 - Enable specific cycles on a per-file basis
 - Add Withaker-despiker smoothing algorithm to dQ/dV data
 - Make dQ/dV and V/Q plot in the same figure if both are to be plotted 
+
+# Program structure
+
+## Flowchart
+
+![](doc/ecdh_flowchart.svg)
+
+## SubModules
+
+**readers**
+
+Functions:
+
+- Read(): Takes a filepath and returns a dataframe with eventual metadata
+    - Dataframe headers: ['mode', 'time/s', 'Ewe/V', '\<I>/mA', 'cycle number']
+- Internal functions:
+    - BioLogic: read_MPT()
+    - Neware: read_xlsx(), read_csv()
+    - Batsmall: read_dat()
+
+**cell**
+
+Contains the Cell class with functions:
+
+- get_data():   Runs readers.read(filename)
+- edit_data(): Runs any of the internal functions according to the cfg.toml and what experiment type the file is.
+- Internal functions:
+    - _edit_cyclelife(): Edits data for easy cyclelife plotting
+    - _edit_CV(): Edits data for easy cyclic voltammetry plotting
+    - _edit_VC(): Edits data for easy voltage versus capacity plotting
+    - _edit_GC(): Edits data for easy galvanostatic cycling plotting
+    - _edit_dQdV(): Edits data for easy dQdV plotting
+
+**plot**
+
+Contains the Plot class with functions:
+
+- plot(): Takes list of cell objects as input parameter, reads the cfg.toml and plots it all according to that.

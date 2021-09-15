@@ -31,16 +31,18 @@ class Plot:
         #print(self.percentage)
         
         # Finding number of subplots
-        if self.qcplot == True:
+        if self.qcplot is True:
             self.subplots = 1
         else:
             self.subplots = 0
-        
-        if self.vqplot == True:
-            self.subplots += numfiles
-        
-        if self.dqdvplot == True:
-            self.subplots += numfiles
+        if self.all_in_one is True:
+            self.subplots+= 1
+        else:
+            if self.vqplot is True:
+                self.subplots += numfiles
+            
+            if self.dqdvplot is True:
+                self.subplots += numfiles
 
 
         
@@ -109,6 +111,9 @@ class Plot:
         # Makes more space.
         #self.fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
+        if self.all_in_one is True:
+            plt.legend()
+
         # Save if True, If out path specified, save there.
         if save == True:
             savename = "CapRet"
@@ -151,3 +156,20 @@ class Plot:
         colors = colors/255
         self.cmap = mpl.colors.LinearSegmentedColormap.from_list('colormap', colors)
         return self.cmap
+
+
+    def plot_CV(self, cellobj):
+        """Takes a cells dataframe and plots it in a CV plot (I/mA vs Ewe/V)"""
+        # Get subplot from main plotclass
+        if self.all_in_one is False:
+            ax = self.give_subplot()
+            ax.set_title("CV: {}".format(os.path.basename(cellobj.fn)))
+        else:
+            ax = self.axes[0]
+            ax.set_title("Cyclic Voltammograms")
+            
+        # Plot it
+        ax.plot(cellobj.df['Ewe/V'], cellobj.df['<I>/mA'], color = cellobj.color, label = os.path.basename(cellobj.fn))
+        ax.set_ylabel("Current [mA]")
+        ax.set_xlabel("Potential [V]")
+

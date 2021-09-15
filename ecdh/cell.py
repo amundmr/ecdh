@@ -127,13 +127,15 @@ class Cell:
                 self.charges = self.charges[self.start_cut:]
 
     def plot(self):
+        if self.df.experiment_mode == 2:
+            self.plotobj.plot_CV(self)
         # Plot it
-        if self.plotobj.qcplot == True:
+        """if self.plotobj.qcplot == True:
             self.plot_cyclelife(self.plotobj)
         if self.plotobj.vqplot == True:
             self.plot_cycles(self.plotobj)
         if self.plotobj.dqdvplot == True:
-            self.plot_dqdv(self.plplotobjot)
+            self.plot_dqdv(self.plplotobjot)"""
         #if self.plotobj.dqdvplot == True and self.plotobj.vqplot == True:
         #    self.plot_cycles_dqdv(self.plotobj)
 
