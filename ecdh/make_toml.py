@@ -3,7 +3,7 @@ from __main__ import LOG
 
 def make_toml(folder):
     files = []
-    extlist = ["mpt", "csv", "dat", "xlsx"]
+    extlist = ["mpt", "csv", "txt", "xlsx"]
 
 
     #Loop over all elements in current directory

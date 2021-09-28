@@ -42,7 +42,7 @@ def run():
     for f in files:
         cell = Cell(f[0], f[1], plot=plot)
         cell.get_data()
-        cell.edit_CV()
+        #cell.edit_CV()
         #cell.treat_data(settings)
         cell.plot()
         #cells.append(cell)

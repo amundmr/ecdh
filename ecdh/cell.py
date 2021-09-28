@@ -126,6 +126,8 @@ class Cell:
     def plot(self):
         if self.df.experiment_mode == 2:
             self.plotobj.plot_CV(self)
+        elif self.df.experiment_mode == 1:
+            self.plotobj.plot_GC(self)
         # Plot it
         """if self.plotobj.qcplot == True:
             self.plot_cyclelife(self.plotobj)

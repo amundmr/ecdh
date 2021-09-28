@@ -63,16 +63,23 @@ def dat_batsmall_to_vq(filename):
     return charges, discharges
 
 def read_txt(filepath):
-    """Main reader for BatSmall data.
+    """
+    Reads a txt file to a pandas dataframe
+
+    .txt format:
+        line 1: user comment
+        header: includes columns TT, U, I, Z1 ++ , corresponding to time, potential, current and cycle number
+
     Important: In the datafile, in the first line (which is the user description) you must use the keyword CV or GC to tell what type of data it is."""
     import pandas as pd
     import numpy as np
     import os
 
+    # Open file
     with open(filepath, 'r') as f:
         lines = f.readlines()
 
-    headerlines = 0
+    # Find out what type of experiment this is
     expmode = 0
     for line in lines:
         if "CV" in line or "Cyclic Voltammetry" in line or "cyclic voltammetry" in line:
@@ -83,22 +90,28 @@ def read_txt(filepath):
             break
         else:
             LOG.warning("Cannot find out which type of experiment the file {} is! Please specify either CV or GC in the comment on the top of the file.".format(os.path.basename(filepath)))
+            break
 
+    # Find out how many headerlines this file have
+    headerlines = 0
     for i,line in enumerate(lines):
         if 'TT' in line and 'U ' in line and 'I ' in line:
             headerlines = i
             break
 
+    # Read all data to a pandas dataframe
     big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
-    print(big_df)
+
+    #Extract useful columns, change the name of the columns, make all numbers numbers.
     df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []']]
     df.rename(columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number'}, inplace=True)
-    df['time/s'] = pd.to_numeric(df['time/s'])
-    df['Ewe/V'] = pd.to_numeric(df['Ewe/V'])
-    df['<I>/mA'] = pd.to_numeric(df['<I>/mA'])
-    df['cycle number'] = pd.to_numeric(df['cycle number']).astype('int32')
+    df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "cycle number": int})
+    #df['time/s'] = pd.to_numeric(df['time/s'])
+    #df['Ewe/V'] = pd.to_numeric(df['Ewe/V'])
+    #df['<I>/mA'] = pd.to_numeric(df['<I>/mA'])
+    #df['cycle number'] = pd.to_numeric(df['cycle number']).astype('int32')
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
     df['mode'] = 0
     df.experiment_mode = expmode
-    print(df)
+
     return df
