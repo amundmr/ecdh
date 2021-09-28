@@ -12,8 +12,17 @@ import toml
 import sys
 
 def run():
-    # Read toml config
-    toml_str = open(sys.argv[2], "r").read()
+    
+    if len(sys.argv) < 3: #Then no folder is specified, look for toml in local folder.
+        if os.path.isfile("./ecdh.toml"):
+            path = "./ecdh.toml"
+        else:
+            LOG.error("Could not find an ecdh.toml file in the current directory! \nOptions: \n1. Run ecdh with the argument 'run' followed by the path of your .toml file. \n2. Initiate toml file in this directory with the init argument.")
+            sys.exit()
+    elif os.path.isfile(sys.argv[2]):# File was inserted Read toml config
+        path = sys.argv[2]
+
+    toml_str = open(path, "r").read()
     config = toml.loads(toml_str)
     settings = config["settings"]
 
@@ -31,16 +40,18 @@ def run():
         cell = Cell(f[0], f[1], plot=plot)
         cell.get_data()
         cell.edit_CV()
-        cell.treat_data(settings)
-        cell.plot()
-        cells.append(cell)
+        #cell.treat_data(settings)
+        #cell.plot()
+        #cells.append(cell)
 
 
 
     plot.draw()
 
 if __name__ == "__main__":
-    if sys.argv[1] == "init":
+    if len(sys.argv) < 2:
+        run()
+    elif sys.argv[1] == "init":
         make_toml("./")
     elif sys.argv[1] == "run":
         run()

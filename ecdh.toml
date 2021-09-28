@@ -1,8 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
 	["./testdata/HV_LNA05MO_E1_AlClad_LP30_C13.mpt","1.0"],
-	["./testdata/HV_LNA05MO_E1_SS304_LP30_C11.mpt","1.0"],
-	["./testdata/HV_LNA05MO_E1_SS316_LP30_C12.mpt","1.0"],
 ]
 
 [settings]
@@ -16,3 +14,4 @@ ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
 start_cut = 0
 all_in_one = true
+fancyplot = true

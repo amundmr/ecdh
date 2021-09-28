@@ -36,19 +36,16 @@ class Cell:
         LOG.debug("Data has been read successfully")
 
     def edit_CV(self):
-        if self.df.experiment_mode != 2:
+        """Takes self.df and returns self.CVdata in the format:
+        self.CVdata = [cycle1, cycle2, cycle3, ... , cycleN]
+        cyclex = (chg, dchg)
+        chg = np.array([[v1, v2, v3, ..., vn],[i1, i2, i3, ..., in]])
+        So it is an array of the voltages and corresponding currents for a charge and discharge cycle in a cycle tuple in a list of cycles. 
+        """
+        if self.df.experiment_mode != 2: #If the data isnt gathered in a cyclic voltammetry experiment, then this doesn't work!
             LOG.warning("File '{}' is not a CV file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
-            num_cycles = self.df['cycle number'].iloc[-1]
-            cycleend = int(len(self.df['Ewe/V'])/num_cycles - 1)
-            dv = self.df['Ewe/V'].iloc[cycleend]- self.df['Ewe/V'].iloc[0]
-            dt = self.df['time/s'].iloc[cycleend]- self.df['time/s'].iloc[0]
-            sweeprate = dv/dt * 1000 
-            LOG.debug("Calculated first cycle sweep rate: {} mV/s.".format(sweeprate))
-            dvdt = self.df[['time/s', 'Ewe/V']]
-            dvdt = dvdt.diff(periods = 1, axis = 0)
-            dvdt = dvdt['Ewe/V'] / dvdt['time/s']
-            print(dvdt.head())
+            print(self.df.groupby('cycle number'))
 
 
     def get_chgs_dchgs(self):
