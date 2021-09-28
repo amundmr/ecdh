@@ -1,6 +1,8 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-	["./testdata/AMR_HV_LNA05MO_E1_AlClad_IL.dat","1.0"],
+	["./testdata/AMR_HV_LNA05MO_E1_AlClad_IL.txt","1.0"],
+	["./testdata/AMR_HV_LNA05MO_E1_AlCladLP30_IL.txt","1.0"],
+	["./testdata/AMR_HV_LNA05MO_E1_SS316_IL.txt","1.0"],
 ]
 
 [settings]

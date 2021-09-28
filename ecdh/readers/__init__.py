@@ -21,8 +21,8 @@ def read(filepath):
         df = BL.read_mpt(filepath)
     elif ext == ".customexport":
         df = BL.custom_EC_export(filepath)
-    elif ext == ".dat":
-        df = BS.read_dat(filepath)
+    elif ext == ".txt":
+        df = BS.read_txt(filepath)
     else:
         LOG.error(f"File format not supported: {ext}")
         LOG.error("Exiting..")
