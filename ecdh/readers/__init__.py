@@ -22,7 +22,7 @@ def read(filepath):
     elif ext == ".customexport":
         df = BL.custom_EC_export(filepath)
     elif ext == ".dat":
-        df = BS.dat_batsmall_to_vq(filepath)
+        df = BS.read_dat(filepath)
     else:
         LOG.error(f"File format not supported: {ext}")
         LOG.error("Exiting..")

@@ -27,7 +27,7 @@ class Cell:
         self.name = os.path.basename(filename)
         self.plotobj = plot
         self.axes = []
-        self.mode_dict = {'1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}
+        self.mode_dict = {'0': 'Unspecified', '1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}
 
 
     def get_data(self):

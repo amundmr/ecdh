@@ -1,4 +1,5 @@
 """Data-readers for Neware"""
+
 from __main__ import LOG
 LOG.error("BATSMALL READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
 def dat_batsmall_to_vq(filename):
@@ -61,3 +62,38 @@ def dat_batsmall_to_vq(filename):
     #print(charges)
     #print(discharges)
     return charges, discharges
+
+def read_dat(filepath):
+    import pandas as pd
+    import numpy as np
+    
+    with open(filepath, 'r') as f:
+        lines = f.readlines()
+
+    headerlines = 0
+    expmode = 0
+    for line in lines:
+        if "CV-Step" in line:
+            expmode = 2
+            break
+        elif "GC-Step" in line:
+            expmode = 1
+            break
+
+    for i,line in enumerate(lines):
+        if '"V";I:"A";C:"Ah/kg"' in line:
+            headerlines = i
+
+    big_df = pd.read_csv(filepath, header = headerlines, sep = ";")
+
+    df = big_df[['7HU:"V"', 'I:"A"']]
+    df.rename(columns={'7HU:"V"': 'Ewe/V', 'I:"A"': '<I>/mA'}, inplace=True)
+    df['Ewe/V'] = pd.to_numeric(df['Ewe/V'])
+    df['<I>/mA'] = pd.to_numeric(df['<I>/mA'])
+    df['<I>/mA'] = df['<I>/mA'].apply(lambda x: x*1000) #Converting from A to mA
+    df['time/s'] = 0
+    df['mode'] = 0
+    df['cycle number'] = 0
+    df.experiment_mode = expmode
+    print(df)
+    return df

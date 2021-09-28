@@ -12,7 +12,7 @@ import toml
 import sys
 
 def run():
-    
+
     if len(sys.argv) < 3: #Then no folder is specified, look for toml in local folder.
         if os.path.isfile("./ecdh.toml"):
             path = "./ecdh.toml"
@@ -21,6 +21,9 @@ def run():
             sys.exit()
     elif os.path.isfile(sys.argv[2]):# File was inserted Read toml config
         path = sys.argv[2]
+    else:
+        LOG.error("Cannot find the .toml configuration file!")
+        sys.exit()
 
     toml_str = open(path, "r").read()
     config = toml.loads(toml_str)
@@ -41,7 +44,7 @@ def run():
         cell.get_data()
         cell.edit_CV()
         #cell.treat_data(settings)
-        #cell.plot()
+        cell.plot()
         #cells.append(cell)
 
 
