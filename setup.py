@@ -15,6 +15,7 @@ setup(
   license='GNU General Public License v3.0',        
   description = 'ElectroChemical Data handler',
   long_description=README,
+  long_description_content_type='text/markdown',
   author = 'Amund Raniseth',                   
   author_email = 'amund.raniseth@gmail.com',      
   url = 'https://github.com/amundmr/ecdh',   
