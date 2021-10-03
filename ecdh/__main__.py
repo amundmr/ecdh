@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 
 """This file is ran when user calls ecdh"""
-from log import LOG
-LOG.set_level("DEBUG")
-from readers import check_files
 
-from make_toml import make_toml
-from plot import *
-from cell import *
+from ecdh.log import LOG
+LOG.set_level("DEBUG")
+from ecdh.readers import check_files
+
+from ecdh.make_toml import make_toml
+from ecdh.plot import *
+from ecdh.cell import *
+
 import toml
 import sys
 
@@ -51,12 +53,15 @@ def run():
 
     plot.draw()
 
-if __name__ == "__main__":
+def main():
     if len(sys.argv) < 2:
         run()
     elif sys.argv[1] == "init":
         make_toml("./")
     elif sys.argv[1] == "run":
         run()
+
+if __name__ == "__main__":
+    main()
 
     

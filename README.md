@@ -45,6 +45,8 @@ Standard Packages:
 - sys
 - datetime
 - math
+- inspect
+- shutil
 
 Custom Packages:
 - Matplotlib

@@ -1,5 +1,5 @@
 import os
-from __main__ import LOG
+from ecdh.log import LOG
 
 def make_toml(folder):
     files = []

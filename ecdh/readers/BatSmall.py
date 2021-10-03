@@ -1,6 +1,6 @@
 """Data-readers for Neware"""
 
-from __main__ import LOG
+from ecdh.log import LOG
 def dat_batsmall_to_vq(filename):
     import numpy as np
     data = []

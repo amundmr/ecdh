@@ -1,9 +1,12 @@
-from __main__ import LOG
-import readers.BatSmall as BS
-import readers.BioLogic as BL
-import readers.Neware as NA
+from ecdh.log import LOG
+from ecdh.readers import (
+    BatSmall as BS, 
+    BioLogic as BL, 
+    Neware as NA
+)
 
-import utils
+from ecdh import utils
+
 import os
 import pandas as pd
 

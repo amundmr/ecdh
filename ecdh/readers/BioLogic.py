@@ -1,6 +1,6 @@
 """Data-readers for BioLogic"""
 
-from __main__ import LOG
+from ecdh.log import LOG
 
 import numpy as np
 import pandas as pd

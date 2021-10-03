@@ -20,7 +20,7 @@ setup(
   url = 'https://github.com/amundmr/ecdh',   
   download_url = 'https://github.com/amundmr/ecdh/archive/refs/tags/v0.1.0.tar.gz',    # Remember to update this with new versions
   keywords = ['Electrochemical', 'battery', 'cell', 'datareader', 'dataplotter', 'reader', 'plotter'],
-  install_requires=[          
+  install_requires=[
             'matplotlib',
             'numpy',
             'pandas',
@@ -41,7 +41,7 @@ setup(
   ],
   entry_points={
         "console_scripts": [
-            "ecdh=ecdh.__main__",
+            "ecdh=ecdh.__main__:main",
         ]
     },
 )

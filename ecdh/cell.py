@@ -1,12 +1,12 @@
 import os as os
 import matplotlib.pyplot as plt
 
-from __main__ import LOG
+from ecdh.log import LOG
 
 from pandas.core.frame import DataFrame
 
-import readers
-import utils
+import ecdh.readers as readers
+import ecdh.utils as utils
 
 
 """
