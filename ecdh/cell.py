@@ -42,10 +42,11 @@ class Cell:
         chg = np.array([[v1, v2, v3, ..., vn],[i1, i2, i3, ..., in]])
         So it is an array of the voltages and corresponding currents for a charge and discharge cycle in a cycle tuple in a list of cycles. 
         """
-        if self.df.experiment_mode != 2: #If the data isnt gathered in a cyclic voltammetry experiment, then this doesn't work!
+        if self.df.experiment_mode != 2: #If the data gathered isn't a cyclic voltammetry experiment, then this doesn't work!
             LOG.warning("File '{}' is not a CV file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
-            print(self.df.groupby('cycle number'))
+            LOG.error("This function isn't completed.")
+            #self.df.groupby('cycle number')
 
 
     def get_chgs_dchgs(self):

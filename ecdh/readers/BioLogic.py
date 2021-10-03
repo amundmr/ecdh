@@ -19,7 +19,7 @@ def mpt_biologic_to_vq_old(filepath):
     for line in f:
         if "Characteristic mass :" in line:
             active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
-            print("Active mass found in file to be: " + str(active_mass) + "g")
+            LOG.success("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
     #Skip all headerlines
