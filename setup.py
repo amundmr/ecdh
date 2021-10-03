@@ -1,10 +1,20 @@
-from distutils.core import setup
+import pathlib
+from setuptools import setup
+
+# The directory containing this file
+HERE = pathlib.Path(__file__).parent
+
+# The text of the README file
+README = (HERE / "README.md").read_text()
+
+
 setup(
   name = 'ecdh',         
   packages = ['ecdh'],   
   version = '0.1.0',     
   license='GNU General Public License v3.0',        
-  description = 'ElectroChemical Data handler',  
+  description = 'ElectroChemical Data handler',
+  long_description=README,
   author = 'Amund Raniseth',                   
   author_email = 'amund.raniseth@gmail.com',      
   url = 'https://github.com/amundmr/ecdh',   
@@ -29,4 +39,9 @@ setup(
     'Programming Language :: Python :: 3.8',
     'Programming Language :: Python :: 3.9',
   ],
+  entry_points={
+        "console_scripts": [
+            "ecdh=ecdh.__main__",
+        ]
+    },
 )
