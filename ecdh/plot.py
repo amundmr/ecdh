@@ -188,6 +188,7 @@ class Plot:
             
         # Plot it
         ## Here we need some function to run edit_GC
-        ax.plot(cellobj.df['Ewe/V'], cellobj.df['<I>/mA'], color = cellobj.color, label = os.path.basename(cellobj.fn))
-        ax.set_ylabel("Current [mA]")
-        ax.set_xlabel("Potential [V]")
+        for cycle in cellobj.GCdata:
+            ax.plot(cycle[0][0], cycle[0][1])
+        ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
+        ax.set_ylabel("Potential [V]")

@@ -103,15 +103,57 @@ def read_txt(filepath):
     big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
 
     #Extract useful columns, change the name of the columns, make all numbers numbers.
-    df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []']]
-    df.rename(columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number'}, inplace=True)
-    df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "cycle number": int})
-    #df['time/s'] = pd.to_numeric(df['time/s'])
-    #df['Ewe/V'] = pd.to_numeric(df['Ewe/V'])
-    #df['<I>/mA'] = pd.to_numeric(df['<I>/mA'])
-    #df['cycle number'] = pd.to_numeric(df['cycle number']).astype('int32')
+    df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []', 'C [mAh/kg]']]
+    df.rename(columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
+    df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
+    df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: x*1000) #Convert from mAh/kg to mAh/g
     df['mode'] = 0
+    df['charge'] = True
     df.experiment_mode = expmode
 
+    check_df(df)
+
     return df
+
+def check_df(df):
+    """Check if the dataframe has:
+    - cycle number (sometimes the Z1 counter fucks up and just says 0)
+    - If it is GC data: then calculate capacity
+    
+    If anything is wrong, it tries to fix it"""
+
+
+    if df.experiment_mode == 1: #Then its GC
+        if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
+            LOG.info("We only found 1 cycle in the data file, and suspect this to be false. Checking now if there should be more cycles.")
+            #We fix this by counting our own cycles.
+
+            prev_sign = False
+            sign = True #Keeping track of the last sign.
+            cycle_number = 1
+
+            for i,current in df['<I>/mA'].items():
+                
+                if current > 0:
+                    sign = True
+                    df['charge'].at[i] = True
+                elif current < 0:
+                    sign = False
+                    df['charge'].at[i] = False
+                
+
+
+                if prev_sign is False and sign is True:
+                    #Changing from a discharge to a charge means new cycle
+                    prev_sign = True
+                    cycle_number += 1
+                    
+                elif prev_sign is True and sign is False:
+                    #Changing from a charge to a discharge
+                    prev_sign = False
+
+                # In place editing of cycle number
+                df['cycle number'].at[i] = cycle_number
+
+                

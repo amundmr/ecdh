@@ -64,7 +64,7 @@ The terminal looks like:
 ```
 $ python3 ../src/main.py init
 [INFO] Wrote example configuration to 'ecdh.toml' with 3
-       files found
+files found
 $ python3 ../src/main.py run ecdh.toml 
 [INFO] Reading file: 'Neware_commasep.csv'
 [INFO] Reading file: 'Biologic-text.mpt'
