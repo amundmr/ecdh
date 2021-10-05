@@ -189,6 +189,7 @@ class Plot:
         # Plot it
         ## Here we need some function to run edit_GC
         for cycle in cellobj.GCdata:
-            ax.plot(cycle[0][0], cycle[0][1])
+            ax.plot(cycle[0][0], cycle[0][1], color = 'g') #0 is charge
+            ax.plot(cycle[1][0], cycle[1][1], color = 'b') #1 is charge
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")

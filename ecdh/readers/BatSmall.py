@@ -107,7 +107,7 @@ def read_txt(filepath):
     df.rename(columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
-    df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: x*1000) #Convert from mAh/kg to mAh/g
+    df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to mAh/g
     df['mode'] = 0
     df['charge'] = True
     df.experiment_mode = expmode
