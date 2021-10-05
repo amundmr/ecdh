@@ -2,6 +2,7 @@ import os
 import sys
 from datetime import date
 from math import ceil, sqrt
+from ecdh.log import LOG
 
 import matplotlib as mpl
 import matplotlib.colors as mcolors
@@ -160,6 +161,7 @@ class Plot:
 
     def plot_CV(self, cellobj):
         """Takes a cells dataframe and plots it in a CV plot (I/mA vs Ewe/V)"""
+        LOG.debug("Running plot.py plot_CV")
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
@@ -173,3 +175,19 @@ class Plot:
         ax.set_ylabel("Current [mA]")
         ax.set_xlabel("Potential [V]")
 
+    def plot_GC(self, cellobj):
+        """Takes a cell dataframe and plots it in a GC plot (Ewe/V vs Cap)"""
+        LOG.debug("Running plot.py plot_GC")
+        # Get subplot from main plotclass
+        if self.all_in_one is False:
+            ax = self.give_subplot()
+            ax.set_title("GC: {}".format(os.path.basename(cellobj.fn)))
+        else:
+            ax = self.axes[0]
+            ax.set_title("Galvanostatic Cycling")
+            
+        # Plot it
+        ## Here we need some function to run edit_GC
+        ax.plot(cellobj.df['Ewe/V'], cellobj.df['<I>/mA'], color = cellobj.color, label = os.path.basename(cellobj.fn))
+        ax.set_ylabel("Current [mA]")
+        ax.set_xlabel("Potential [V]")

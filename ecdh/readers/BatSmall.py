@@ -85,7 +85,7 @@ def read_txt(filepath):
         if "CV" in line or "Cyclic Voltammetry" in line or "cyclic voltammetry" in line:
             expmode = 2
             break
-        elif "GC-Step" in line:
+        elif "GC" in line or "Galvanostatic" in line or "galvanostatic" in line:
             expmode = 1
             break
         else:

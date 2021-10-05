@@ -48,6 +48,24 @@ class Cell:
             LOG.error("This function isn't completed.")
             #self.df.groupby('cycle number')
 
+    def edit_GC(self):
+        """Takes self.df ad returns self.GCdata in the format:
+        self.GCdata = [cycle1, cycle2, cycle3, ... , cycleN]
+        cyclex = (chg, dchg)
+        chg = np.array([[q1, q2, q3, ..., qn],[v1, v2, v3, ..., vn]]) where q is capacity"""
+        if self.df.experiment_mode != 1: #If the data gathered isn't a galvanostatic experiment, then this doesn't work!
+            LOG.warning("File '{}' is not a GC file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
+        else:
+            LOG.error("This function isn't completed.")
+            
+            cycle_list = []
+            for cycle, subframe in self.df.groupby('cycle number'):
+                cycle_data = subframe
+                print(cycle_data)
+                cycle_list.append(cycle)
+            
+
+
 
     def get_chgs_dchgs(self):
 
