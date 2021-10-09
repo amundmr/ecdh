@@ -127,12 +127,14 @@ def check_df(df):
 
     if df.experiment_mode == 1: #Then its GC
         if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
-            LOG.info("We only found 1 cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
-            #We fix this by counting our own cycles.
+            LOG.info("We only found one cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
 
-            prev_sign = False
-            sign = True #Keeping track of the last sign.
+            #We fix this by counting our own cycles.
+            #Keeping track of signs of current (positive or negative) and cycle number
+            prev_sign = True
+            sign = True 
             cycle_number = 1
+            new_cycle_indexes = []
 
             for i,current in df['<I>/mA'].items():
                 
@@ -149,13 +151,18 @@ def check_df(df):
                     #Changing from a discharge to a charge means new cycle
                     prev_sign = True
                     cycle_number += 1
+                    new_cycle_indexes.append(i-1)
                     
                 elif prev_sign is True and sign is False:
                     #Changing from a charge to a discharge
                     prev_sign = False
+                    new_cycle_indexes.append(i-1)
 
                 # In place editing of cycle number
                 df['cycle number'].at[i] = cycle_number
+
+            #Remove rows where a new experiment start (BatSmall has fucked datalogging here, where the current and voltage is the same as the prev step, but the capacity restarts)
+            df.drop(new_cycle_indexes, axis = 0, inplace = True)
 
             if cycle_number > 1:
                 LOG.info("Found {} cycles in {}".format(cycle_number, df.name))

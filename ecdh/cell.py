@@ -50,7 +50,7 @@ class Cell:
 
     def edit_GC(self):
         import numpy as np
-        """Takes self.df ad returns self.GCdata in the format:
+        """Takes self.df and returns self.GCdata in the format:
         self.GCdata = [cycle1, cycle2, cycle3, ... , cycleN]
         cyclex = (chg, dchg)
         chg = np.array([[q1, q2, q3, ..., qn],[v1, v2, v3, ..., vn]]) where q is capacity"""
@@ -62,6 +62,8 @@ class Cell:
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
                 (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
+                print(chgdat)
+                print(dchgdat)
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
             
