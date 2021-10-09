@@ -62,8 +62,7 @@ class Cell:
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
                 (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
-                print(chgdat)
-                print(dchgdat)
+
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
             

@@ -178,6 +178,7 @@ class Plot:
     def plot_GC(self, cellobj):
         """Takes a cell dataframe and plots it in a GC plot (Ewe/V vs Cap)"""
         LOG.debug("Running plot.py plot_GC")
+
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
@@ -188,8 +189,11 @@ class Plot:
             
         # Plot it
         ## Here we need some function to run edit_GC
-        for cycle in cellobj.GCdata:
-            ax.plot(cycle[0][0], cycle[0][1], color = 'g') #0 is charge
-            ax.plot(cycle[1][0], cycle[1][1], color = 'b') #1 is charge
+        cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
+        Nc = len(cellobj.GCdata) #Find number of colors
+
+        for i,cycle in enumerate(cellobj.GCdata):
+            ax.plot(cycle[0][0], cycle[0][1], color = cmap(i/Nc)) #0 is charge
+            ax.plot(cycle[1][0], cycle[1][1], color = cmap(i/Nc)) #1 is charge
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")
