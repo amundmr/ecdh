@@ -111,6 +111,7 @@ def read_txt(filepath):
     df['mode'] = 0
     df['charge'] = True
     df.experiment_mode = expmode
+    df.name = os.path.basename(filepath)
 
     check_df(df)
 
@@ -126,7 +127,7 @@ def check_df(df):
 
     if df.experiment_mode == 1: #Then its GC
         if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
-            LOG.info("We only found 1 cycle in the data file, and suspect this to be false. Checking now if there should be more cycles.")
+            LOG.info("We only found 1 cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
             #We fix this by counting our own cycles.
 
             prev_sign = False
@@ -155,5 +156,10 @@ def check_df(df):
 
                 # In place editing of cycle number
                 df['cycle number'].at[i] = cycle_number
+
+            if cycle_number > 1:
+                LOG.info("Found {} cycles in {}".format(cycle_number, df.name))
+            else:
+                LOG.info("There seems to only be one cycle. Sorry for wasting your time.")
 
                 
