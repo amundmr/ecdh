@@ -109,7 +109,7 @@ def read_mpt(filepath):
     df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
     df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
     df.rename(columns={'ox/red': 'charge', 'Q charge/discharge/mA.h': 'capacity/mAhg'}, inplace=True)
-    df['charge'] = df['charge'].replace({1: True, 0: False})
+    df['charge'].replace({1: True, 0: False}, inplace = True)
     
     mode = df['mode'].value_counts().idxmax()
     LOG.debug("Found cycling mode: {}".format(mode))
