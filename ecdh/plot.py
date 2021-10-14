@@ -195,5 +195,11 @@ class Plot:
         for i,cycle in enumerate(cellobj.GCdata):
             ax.plot(cycle[0][0], cycle[0][1], color = cmap(i/Nc)) #0 is charge
             ax.plot(cycle[1][0], cycle[1][1], color = cmap(i/Nc)) #1 is charge
+
+        # Adding colorbar to plot
+        sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
+        sm._A = []
+        ax.colorbar(sm, ax=ax, label = "Cycle number")
+        
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")
