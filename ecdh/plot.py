@@ -175,6 +175,8 @@ class Plot:
         ax.set_ylabel("Current [mA]")
         ax.set_xlabel("Potential [V]")
 
+
+
     def plot_GC(self, cellobj):
         """Takes a cell dataframe and plots it in a GC plot (Ewe/V vs Cap)"""
         LOG.debug("Running plot.py plot_GC")
@@ -187,12 +189,27 @@ class Plot:
             ax = self.axes[0]
             ax.set_title("Galvanostatic Cycling")
             
+        #Placing it in a plot with correct colors
+        self.insert_cycle_data(cellobj, ax, self.GCdata)
 
+        
+        ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
+        ax.set_ylabel("Potential [V]")
+
+
+    def insert_cycle_data(self, cellobj, ax, data):
+        """
+        Inserts the given data in the given axis with data from the cellobject
+        Data must be on form 
+        data = [cycle1, cycle2, cycle3, ... , cycleN]
+        cyclex = (chg, dchg)
+        chg = np.array([[x1, x2, x3, ..., xn],[y1, y2, y3, ..., yn]]) where x is usually either capacity or potential and y usually potential or current
+        """
         # Generating colormap
         cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
         #Define cycle amount for use with colors
         Nc = len(cellobj.GCdata)
-        print(Nc)
+
         # Plot it
         cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
         Nc = len(cellobj.GCdata) #Find number of colors
@@ -217,9 +234,5 @@ class Plot:
                     color = colorlist[0]
                     colorlist = colorlist[1:]
 
-                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #0 is charge
+                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle since the first index in cycle is 0
                     ax.plot(cycle[1][0], cycle[1][1], color = color) #1 is discharge
-
-        
-        ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
-        ax.set_ylabel("Potential [V]")
