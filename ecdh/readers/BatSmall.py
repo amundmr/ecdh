@@ -134,20 +134,20 @@ def check_df(df):
             cycle_number = 1
 
             for i,current in df['<I>/mA'].items():
-                
+
                 if current > 0:
                     sign = True
-                    df['charge'].at[i] = True
+                    df['charge'].at[i-1] = True
                 elif current < 0:
                     sign = False
-                    df['charge'].at[i] = False
+                    df['charge'].at[i-1] = False
                 
-
 
                 if prev_sign is False and sign is True:
                     #Changing from a discharge to a charge means new cycle
                     prev_sign = True
                     cycle_number += 1
+                    df['cycle number'].at[i-1] = cycle_number
                     
                 elif prev_sign is True and sign is False:
                     #Changing from a charge to a discharge

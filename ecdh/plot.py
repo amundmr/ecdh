@@ -186,10 +186,16 @@ class Plot:
             ax = self.axes[0]
             ax.set_title("Galvanostatic Cycling")
             
+
+        # Generating colormap
+        cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
+        #Define cycle amount for use with colors
+        Nc = len(cellobj.GCdata)
+        print(Nc)
         # Plot it
-        ## Here we need some function to run edit_GC
-        for cycle in cellobj.GCdata:
-            ax.plot(cycle[0][0], cycle[0][1], color = 'g') #0 is charge
-            ax.plot(cycle[1][0], cycle[1][1], color = 'b') #1 is charge
+        for i,cycle in enumerate(cellobj.GCdata):
+            ax.plot(cycle[0][0], cycle[0][1], c = cmap(i/Nc)) #0 is charge
+            ax.plot(cycle[1][0], cycle[1][1], c = cmap(i/Nc)) #1 is charge
+
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")
