@@ -45,7 +45,6 @@ class Plot:
             if self.dqdvplot is True:
                 self.subplots += numfiles
 
-
         
         # List of available colors
         self.colors =  ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan' ]
@@ -127,11 +126,12 @@ class Plot:
         if show == True:
             plt.show()
 
-            
+
     def get_color(self):
         give_color = self.colors[0]
         self.colors = self.colors[1:]
         return give_color
+        
 
     def cycle_color(self, ncycle):
         colors = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
@@ -178,6 +178,7 @@ class Plot:
     def plot_GC(self, cellobj):
         """Takes a cell dataframe and plots it in a GC plot (Ewe/V vs Cap)"""
         LOG.debug("Running plot.py plot_GC")
+
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
@@ -193,9 +194,32 @@ class Plot:
         Nc = len(cellobj.GCdata)
         print(Nc)
         # Plot it
-        for i,cycle in enumerate(cellobj.GCdata):
-            ax.plot(cycle[0][0], cycle[0][1], c = cmap(i/Nc)) #0 is charge
-            ax.plot(cycle[1][0], cycle[1][1], c = cmap(i/Nc)) #1 is charge
+        cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
+        Nc = len(cellobj.GCdata) #Find number of colors
 
+        if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
+            for i,cycle in enumerate(cellobj.GCdata):
+                ax.plot(cycle[0][0], cycle[0][1], color = cmap(i/Nc)) #0 is charge
+                ax.plot(cycle[1][0], cycle[1][1], color = cmap(i/Nc)) #1 is charge
+
+            # Adding colorbar to plot
+            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
+            sm._A = []
+            self.fig.colorbar(sm, ax=ax, label = "Cycle number")
+
+        else: #There are either specific cycles or <=5 cycles in the data
+
+            colorlist = self.colors
+
+            for i,cycle in enumerate(cellobj.GCdata):
+
+                if i in cellobj.specific_cycles:
+                    color = colorlist[0]
+                    colorlist = colorlist[1:]
+
+                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #0 is charge
+                    ax.plot(cycle[1][0], cycle[1][1], color = color) #1 is discharge
+
+        
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")

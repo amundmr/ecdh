@@ -20,7 +20,7 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 
 
 class Cell:
-    def __init__(self, filename, am_mass, plot = None,):
+    def __init__(self, filename, am_mass, plot = None, specific_cycles = None):
         self.fn = filename
         self.am_mass = float(am_mass)
         self.color = plot.get_color()
@@ -28,6 +28,7 @@ class Cell:
         self.plotobj = plot
         self.axes = []
         self.mode_dict = {'0': 'Unspecified', '1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}
+        self.specific_cycles = specific_cycles
 
 
     def get_data(self):
@@ -50,7 +51,7 @@ class Cell:
 
     def edit_GC(self):
         import numpy as np
-        """Takes self.df ad returns self.GCdata in the format:
+        """Takes self.df and returns self.GCdata in the format:
         self.GCdata = [cycle1, cycle2, cycle3, ... , cycleN]
         cyclex = (chg, dchg)
         chg = np.array([[q1, q2, q3, ..., qn],[v1, v2, v3, ..., vn]]) where q is capacity"""
@@ -62,76 +63,10 @@ class Cell:
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
                 (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
+
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
             
-
-            
-
-
-
-    def get_chgs_dchgs(self):
-
-        charges = []
-        discharges = []
-        newox = False
-        oldox = eval(lines[headerlines].split()[1])
-        oldcap = 0
-        t_prev = 0
-        t_cycstart = 0
-        tmp_cyc_E = []
-        tmp_cyc_C = []
-        Cap_cum = []
-        for line in lines[headerlines:]:
-            if oldox == eval(line.split()[1]):
-                tmp_cyc_E.append(eval(line.split()[9]))
-                tmp_cyc_C.append(eval(line.split()[17]))
-                
-                #Manual capacity calculation
-                I_cur = eval(line.split()[10])
-                t_cur = eval(line.split()[7])/3600 - t_cycstart
-                timedelta = t_cur - t_prev
-                Cap_cum.append(abs(oldcap + I_cur * timedelta))
-                t_prev = t_cur
-                oldcap += I_cur * timedelta
-
-            else:
-                #print("End-Halfcycle-triggered")
-                if oldox == 1: #Charge cycle
-                    charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
-                elif oldox == 0: #Discharge cycle
-                    discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
-                
-                # Resetting the temporary lists
-                tmp_cyc_E = []
-                tmp_cyc_C = []
-                Cap_cum = []
-                t_prev = 0
-                oldcap = 0
-                # Setting the new ox status
-                oldox = eval(line.split()[1])
-                # Must remember to add this line's values!
-                tmp_cyc_E.append(eval(line.split()[9]))
-                tmp_cyc_C.append(eval(line.split()[17]))
-
-                t_cycstart = eval(line.split()[7])/3600 # Resetting time of start of cycle
-                #Manual capacity calculation
-                I_cur = eval(line.split()[10])
-                t_cur = eval(line.split()[7])/3600 - t_cycstart
-                timedelta = t_cur - t_prev
-                Cap_cum.append(oldcap + I_cur * timedelta)
-                t_prev = t_cur
-                oldcap += I_cur * timedelta
-
-        # Adding the last data to arrays if the file ends
-        if oldox == 1: #Charge cycle
-            LOG.debug("Datafile ended with a Charge")
-            charges.append((np.array(tmp_cyc_E), np.array(Cap_cum))) # Making the lists into arrays and putting them in a tuple as a charge cycle
-        elif oldox == 0: #Discharge cycle
-            LOG.debug("Datafile ended with a Discharge")
-            discharges.append((np.array(tmp_cyc_E), np.array(Cap_cum)))
-
-        return charges, discharges  
 
     def treat_data(self, config):
         LOG.debug("Treating data")
