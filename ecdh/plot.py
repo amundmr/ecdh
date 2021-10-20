@@ -170,8 +170,10 @@ class Plot:
             ax = self.axes[0]
             ax.set_title("Cyclic Voltammograms")
             
-        # Plot it
-        ax.plot(cellobj.df['Ewe/V'], cellobj.df['<I>/mA'], color = cellobj.color, label = os.path.basename(cellobj.fn))
+        #Placing it in a plot with correct colors
+        self.insert_cycle_data(cellobj, ax, self.CVdata)
+
+
         ax.set_ylabel("Current [mA]")
         ax.set_xlabel("Potential [V]")
 

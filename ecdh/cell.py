@@ -37,6 +37,7 @@ class Cell:
         LOG.debug("Data has been read successfully")
 
     def edit_CV(self):
+        import numpy as np
         """Takes self.df and returns self.CVdata in the format:
         self.CVdata = [cycle1, cycle2, cycle3, ... , cycleN]
         cyclex = (chg, dchg)
@@ -47,7 +48,16 @@ class Cell:
             LOG.warning("File '{}' is not a CV file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
             LOG.error("This function isn't completed.")
-            #self.df.groupby('cycle number')
+            self.CVdata = []
+            for cycle, subframe in self.df.groupby('cycle number'):
+                cycle_data = subframe
+                print(subframe.groupby('charge'))
+                #TODO This next one fails, but it did work in edit_GC, why? Need to test that the edit_GC works once more.
+                (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
+
+                cycle = (np.array([chgdat['Ewe/V'], chgdat['<I>/mA']]), np.array([dchgdat['Ewe/V'], dchgdat['<I>/mA']]))
+                self.CVdata.append(cycle)
+
 
     def edit_GC(self):
         import numpy as np
@@ -82,8 +92,10 @@ class Cell:
 
     def plot(self):
         if self.df.experiment_mode == 2:
+            self.edit_CV()
             self.plotobj.plot_CV(self)
         elif self.df.experiment_mode == 1:
+            self.edit_GC()
             self.plotobj.plot_GC(self)
         # Plot it
         """if self.plotobj.qcplot == True:
