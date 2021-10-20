@@ -79,6 +79,7 @@ def read_mpt(filepath):
         mode column: 1=Galvanostatic, 2=Linear Potential Sweep, 3=Rest
 
     """
+    modes = {1: "Galvanostatic", 2 : "Linear Potential Sweep", 3 : "Rest"}
 
     #with open(filepath, 'r', encoding= "iso-8859-1") as f:  #open the filepath for the mpt file
     #    lines = f.readlines()
@@ -102,18 +103,27 @@ def read_mpt(filepath):
     big_df = pd.read_csv(filepath, header=headerlines-1, sep="\t", encoding = "ISO-8859-1")
     LOG.debug("Dataframe column names: {}".format(big_df.columns))
 
-    df = big_df[['mode', 'time/s', 'Ewe/V', '<I>/mA', 'cycle number', 'ox/red', 'Q charge/discharge/mA.h']]
+    # Start filling dataframe
+    df = big_df[['mode', 'time/s', 'Ewe/V', '<I>/mA', 'cycle number', 'ox/red']]
+
+    # If it's galvanostatic we want the capacity
+    mode = df['mode'].value_counts().idxmax() #Find mode with maximum occurences
+    LOG.debug("Found cycling mode: {}".format(modes[mode]))
+    df.experiment_mode = mode
+    if mode == 1:
+        df = df.join(big_df['Q charge/discharge/mA.h'])
+        df.rename(columns={'Q charge/discharge/mA.h': 'capacity/mAhg'}, inplace=True)
+
+
     # Replace , by . and make numeric from strings. Mode is already interpreted as int.
     df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
     df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
     df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
     df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
-    df.rename(columns={'ox/red': 'charge', 'Q charge/discharge/mA.h': 'capacity/mAhg'}, inplace=True)
+    df.rename(columns={'ox/red': 'charge'}, inplace=True)
     df['charge'].replace({1: True, 0: False}, inplace = True)
     
-    mode = df['mode'].value_counts().idxmax()
-    LOG.debug("Found cycling mode: {}".format(mode))
-    df.experiment_mode = mode
+    
     return df
     
 
