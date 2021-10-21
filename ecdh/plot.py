@@ -217,8 +217,8 @@ class Plot:
         if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
             for i,cycle in enumerate(cellobj.GCdata):
                 chg, dchg = cycle
-                ax.plot(chg[0], chg[1], color = cmap(i/Nc)) #0 is charge
-                ax.plot(dchg[0], dchg[1], color = cmap(i/Nc)) #1 is charge
+                ax.plot(chg[0], chg[1], color = cmap(i/Nc))
+                ax.plot(dchg[0], dchg[1], color = cmap(i/Nc))
 
             # Adding colorbar to plot
             sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
@@ -235,5 +235,6 @@ class Plot:
                     color = colorlist[0]
                     colorlist = colorlist[1:]
 
-                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
-                    ax.plot(cycle[1][0], cycle[1][1], color = color) #1 is discharge
+                    chg, dchg = cycle
+                    ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
+                    ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
