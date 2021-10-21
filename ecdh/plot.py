@@ -171,7 +171,7 @@ class Plot:
             ax.set_title("Cyclic Voltammograms")
             
         #Placing it in a plot with correct colors
-        self.insert_cycle_data(cellobj, ax)
+        self.insert_cycle_data(cellobj, ax, cellobj.CVdata)
 
 
         ax.set_ylabel("Current [mA]")
@@ -192,14 +192,14 @@ class Plot:
             ax.set_title("Galvanostatic Cycling")
             
         #Placing it in a plot with correct colors
-        self.insert_cycle_data(cellobj, ax)
+        self.insert_cycle_data(cellobj, ax, cellobj.GCdata)
 
         
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")
 
 
-    def insert_cycle_data(self, cellobj, ax):
+    def insert_cycle_data(self, cellobj, ax, data):
         """
         Inserts the given data in the given axis with data from the cellobject
         Data must be on form 
@@ -210,12 +210,13 @@ class Plot:
         # Generating colormap
         cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
         #Define cycle amount for use with colors
-        Nc = len(cellobj.GCdata)
+        Nc = len(data)
+
 
 
         # Plot it
         if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
-            for i,cycle in enumerate(cellobj.GCdata):
+            for i,cycle in enumerate(data):
                 chg, dchg = cycle
                 ax.plot(chg[0], chg[1], color = cmap(i/Nc))
                 ax.plot(dchg[0], dchg[1], color = cmap(i/Nc))
@@ -228,10 +229,18 @@ class Plot:
         else: #There are either specific cycles or <=5 cycles in the data
 
             colorlist = self.colors
+            if cellobj.specific_cycles:
+                for i,cycle in enumerate(data):
+                    if i in cellobj.specific_cycles:
+                        color = colorlist[0]
+                        colorlist = colorlist[1:]
 
-            for i,cycle in enumerate(cellobj.GCdata):
+                        chg, dchg = cycle
+                        ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
+                        ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
+            else:
+                for i,cycle in enumerate(data):
 
-                if i in cellobj.specific_cycles:
                     color = colorlist[0]
                     colorlist = colorlist[1:]
 

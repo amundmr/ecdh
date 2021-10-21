@@ -51,9 +51,9 @@ class Cell:
             self.CVdata = []
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
-                print(subframe.groupby('charge'))
-                #TODO This next one fails, but it did work in edit_GC, why? Need to test that the edit_GC works once more.
-                (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
+
+                chgdat = subframe[subframe['charge'] == True]
+                dchgdat = subframe[subframe['charge'] == False]
 
                 cycle = (np.array([chgdat['Ewe/V'], chgdat['<I>/mA']]), np.array([dchgdat['Ewe/V'], dchgdat['<I>/mA']]))
                 self.CVdata.append(cycle)
@@ -72,7 +72,8 @@ class Cell:
             cycle_list = []
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
-                (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
+                chgdat = subframe[subframe['charge'] == True]
+                dchgdat = subframe[subframe['charge'] == False]
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
