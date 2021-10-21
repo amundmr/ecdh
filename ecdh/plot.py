@@ -171,7 +171,7 @@ class Plot:
             ax.set_title("Cyclic Voltammograms")
             
         #Placing it in a plot with correct colors
-        self.insert_cycle_data(cellobj, ax, self.CVdata)
+        self.insert_cycle_data(cellobj, ax)
 
 
         ax.set_ylabel("Current [mA]")
@@ -192,14 +192,14 @@ class Plot:
             ax.set_title("Galvanostatic Cycling")
             
         #Placing it in a plot with correct colors
-        self.insert_cycle_data(cellobj, ax, self.GCdata)
+        self.insert_cycle_data(cellobj, ax)
 
         
         ax.set_xlabel(r"Capacity [$\frac{mAh}{g}$]")
         ax.set_ylabel("Potential [V]")
 
 
-    def insert_cycle_data(self, cellobj, ax, data):
+    def insert_cycle_data(self, cellobj, ax):
         """
         Inserts the given data in the given axis with data from the cellobject
         Data must be on form 
@@ -213,13 +213,11 @@ class Plot:
         Nc = len(cellobj.GCdata)
 
         # Plot it
-        cmap = self.colormap(cellobj.color) #create colormap for fade from basic color
-        Nc = len(cellobj.GCdata) #Find number of colors
-
         if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
             for i,cycle in enumerate(cellobj.GCdata):
-                ax.plot(cycle[0][0], cycle[0][1], color = cmap(i/Nc)) #0 is charge
-                ax.plot(cycle[1][0], cycle[1][1], color = cmap(i/Nc)) #1 is charge
+                chg, dchg = cycle
+                ax.plot(chg[0], chg[1], color = cmap(i/Nc)) #0 is charge
+                ax.plot(dchg[0], dchg[1], color = cmap(i/Nc)) #1 is charge
 
             # Adding colorbar to plot
             sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
@@ -236,5 +234,5 @@ class Plot:
                     color = colorlist[0]
                     colorlist = colorlist[1:]
 
-                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle since the first index in cycle is 0
+                    ax.plot(cycle[0][0], cycle[0][1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
                     ax.plot(cycle[1][0], cycle[1][1], color = color) #1 is discharge
