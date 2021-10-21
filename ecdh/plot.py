@@ -212,6 +212,7 @@ class Plot:
         #Define cycle amount for use with colors
         Nc = len(cellobj.GCdata)
 
+
         # Plot it
         if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
             for i,cycle in enumerate(cellobj.GCdata):

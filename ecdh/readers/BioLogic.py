@@ -112,7 +112,7 @@ def read_mpt(filepath):
     if mode == 1:
         df = df.join(big_df['Capacity/mA.h'])
         df.rename(columns={'Capacity/mA.h': 'capacity/mAhg'}, inplace=True)
-
+        df['capacity/mAhg'] = pd.to_numeric(df['capacity/mAhg'].str.replace(',','.'))
 
     # Replace , by . and make numeric from strings. Mode is already interpreted as int.
     df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))

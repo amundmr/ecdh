@@ -74,10 +74,9 @@ class Cell:
                 cycle_data = subframe
                 (chg, chgdat), (dchg, dchgdat) = subframe.groupby('charge')
 
-                cycle = (([chgdat['capacity/mAhg'].to_numpy(), chgdat['Ewe/V'].to_numpy()]), ([dchgdat['capacity/mAhg'].to_numpy(), dchgdat['Ewe/V'].to_numpy()]))
+                cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
-
-                print(self.GCdata)
+            
 
     def treat_data(self, config):
         LOG.debug("Treating data")
