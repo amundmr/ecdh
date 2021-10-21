@@ -109,10 +109,9 @@ def read_mpt(filepath):
     # If it's galvanostatic we want the capacity
     mode = df['mode'].value_counts().idxmax() #Find mode with maximum occurences
     LOG.debug("Found cycling mode: {}".format(modes[mode]))
-    df.experiment_mode = mode
     if mode == 1:
-        df = df.join(big_df['Q charge/discharge/mA.h'])
-        df.rename(columns={'Q charge/discharge/mA.h': 'capacity/mAhg'}, inplace=True)
+        df = df.join(big_df['Capacity/mA.h'])
+        df.rename(columns={'Capacity/mA.h': 'capacity/mAhg'}, inplace=True)
 
 
     # Replace , by . and make numeric from strings. Mode is already interpreted as int.
@@ -122,6 +121,9 @@ def read_mpt(filepath):
     df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
     df.rename(columns={'ox/red': 'charge'}, inplace=True)
     df['charge'].replace({1: True, 0: False}, inplace = True)
+
+    #Adding attributes must be the last thing to do since it will not be copied when doing operations on the dataframe
+    df.experiment_mode = mode
     
     
     return df
