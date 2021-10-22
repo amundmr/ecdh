@@ -2,6 +2,7 @@
 files = [
 	["./testdata/12_A1LNMO_E1_C1_C02.mpt","1.0"],
 	["./testdata/12_A1LNMO_E1_C2_C03.mpt","1.0"],
+	#["./testdata/HV_LNA05MO_E1_SS304_LP30_C11.mpt","1.0"],
 ]
 
 [settings]

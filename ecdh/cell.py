@@ -47,11 +47,15 @@ class Cell:
         if self.df.experiment_mode != 2: #If the data gathered isn't a cyclic voltammetry experiment, then this doesn't work!
             LOG.warning("File '{}' is not a CV file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
-            LOG.error("This function isn't completed.")
             self.CVdata = []
-            for cycle, subframe in self.df.groupby('cycle number'):
-                cycle_data = subframe
 
+            #Remove all datapoints where mode != 2, we dont care about other data than CV here.
+            index_names = self.df[self.df['mode'] != 2].index
+            rawCVdata = self.df.drop(index_names)
+
+            for cycle, subframe in rawCVdata.groupby('cycle number'):
+
+                #Split into charge and discharge data
                 chgdat = subframe[subframe['charge'] == True]
                 dchgdat = subframe[subframe['charge'] == False]
 
@@ -69,15 +73,14 @@ class Cell:
             LOG.warning("File '{}' is not a GC file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
             self.GCdata = []
-            cycle_list = []
-            for cycle, subframe in self.df.groupby('cycle number'):
-                cycle_data = subframe
 
-                #Remove all datapoints where mode != 1, we dont care about other data than GC here.
-                index_names = subframe[subframe['mode'] != 1].index
-                subframe.drop(index_names, inplace = True)
-                #subframe[subframe['mode'] == 1, ]
+            #Remove all datapoints where mode != 1, we dont care about other data than GC here.
+            index_names = self.df[self.df['mode'] != 1].index
+            rawGCdata = self.df.drop(index_names)
+            
+            for cycle, subframe in rawGCdata.groupby('cycle number'):
 
+                #Split into charge and discharge data
                 chgdat = subframe[subframe['charge'] == True]
                 dchgdat = subframe[subframe['charge'] == False]
 
