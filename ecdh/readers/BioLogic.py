@@ -107,8 +107,11 @@ def read_mpt(filepath):
     df = big_df[['mode', 'time/s', 'Ewe/V', '<I>/mA', 'cycle number', 'ox/red']]
 
     # If it's galvanostatic we want the capacity
-    mode = df['mode'].value_counts().idxmax() #Find mode with maximum occurences
+    mode = df['mode'].value_counts() #Find occurences of modes
+    mode = mode[mode.index != 3] #Remove the count of modes with rest (if there are large rests, there might be more rest datapoints than GC/CV steps)
+    mode = mode.idxmax()    # Picking out the mode with the maximum occurences
     LOG.debug("Found cycling mode: {}".format(modes[mode]))
+
     if mode == 1:
         df = df.join(big_df['Capacity/mA.h'])
         df.rename(columns={'Capacity/mA.h': 'capacity/mAhg'}, inplace=True)
@@ -124,7 +127,6 @@ def read_mpt(filepath):
 
     #Adding attributes must be the last thing to do since it will not be copied when doing operations on the dataframe
     df.experiment_mode = mode
-    
     
     return df
     

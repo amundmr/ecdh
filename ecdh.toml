@@ -1,6 +1,7 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
 	["./testdata/12_A1LNMO_E1_C1_C02.mpt","1.0"],
+	["./testdata/12_A1LNMO_E1_C2_C03.mpt","1.0"],
 ]
 
 [settings]

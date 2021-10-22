@@ -72,8 +72,16 @@ class Cell:
             cycle_list = []
             for cycle, subframe in self.df.groupby('cycle number'):
                 cycle_data = subframe
+
+                #Remove all datapoints where mode != 1, we dont care about other data than GC here.
+                index_names = subframe[subframe['mode'] != 1].index
+                subframe.drop(index_names, inplace = True)
+                #subframe[subframe['mode'] == 1, ]
+
                 chgdat = subframe[subframe['charge'] == True]
                 dchgdat = subframe[subframe['charge'] == False]
+
+                
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)

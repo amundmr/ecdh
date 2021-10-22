@@ -224,7 +224,10 @@ class Plot:
             # Adding colorbar to plot
             sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
             sm._A = []
-            self.fig.colorbar(sm, ax=ax, label = "Cycle number")
+            if self.all_in_one is True:
+                self.fig.colorbar(sm, ax=ax, label = "Cycle number for {}".format(cellobj.name))
+            else:
+                self.fig.colorbar(sm, ax=ax, label = "Cycle number")
 
         else: #There are either specific cycles or <=5 cycles in the data
 
