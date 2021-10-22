@@ -58,10 +58,13 @@ class Plot:
         else:
             self.fig, self.axes = plt.subplots(nrows = self.subplots)
         self.fig.suptitle(str(date.today()))
+
+        #Make sure self.axes is a list if it is only 1 element
         try:
             iter(self.axes)
         except:
             self.axes = [self.axes]
+        
         for ax in self.axes:
             #ax.figure.set_size_inches(8.4, 4.8, forward = True)
             ax.set(
@@ -158,16 +161,41 @@ class Plot:
         self.cmap = mpl.colors.LinearSegmentedColormap.from_list('colormap', colors)
         return self.cmap
 
+    def plot_cyclelife(self, cellobj):
+        """Takes a cell object and plots it in a cyclelife plot with either specific capacity or percentage on the y axis versus cycle number on the x axis"""
+        data = cellobj.cyclelifedata
+        norm_fact = data["discharge capacity/mAh"].iloc[0]
+
+        if self.percentage == True: #Normalize capacities on the first cycle.
+            data["discharge capacity/mAh"] = data["discharge capacity/mAh"] / norm_fact
+            data["charge capacity/mAh"] = data["charge capacity/mAh"] / norm_fact
+        else: # If not precentage, then it is specific
+            data["discharge capacity/mAh"] = data["discharge capacity/mAh"] / cellobj.am_mass
+            data["charge capacity/mAh"] = data["charge capacity/mAh"] / cellobj.am_mass
+
+        ax = self.axes[0]   #Getting the right plot
+        Nc = cellobj.cyclelifedata.count      #finding max number of cycles
+        # Plot it
+        if not cellobj.specific_cycles: #Not specific cycles? then plot all.
+            ax.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["charge capacity/mAh"],color = cellobj.color, alpha = 0.2)
+            ax.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["discharge capacity/mAh"],color = cellobj.color, label = cellobj.name)
+
+        else: #There are specific cycles
+            LOG.error("Specific cycles hasnt been implemented in lifecycle plot")
+            #colorlist = self.colors
+            #for i,cycle in enumerate(cellobj.cyclelifedata[3]):
+            #    if cycle not in cellobj.specific_cycles:
+
 
     def plot_CV(self, cellobj):
-        """Takes a cells dataframe and plots it in a CV plot (I/mA vs Ewe/V)"""
+        """Takes a cellobject and plots it in a CV plot (I/mA vs Ewe/V)"""
         LOG.debug("Running plot.py plot_CV")
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
             ax.set_title("CV: {}".format(os.path.basename(cellobj.fn)))
         else:
-            ax = self.axes[0]
+            ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Cyclic Voltammograms")
             
         #Placing it in a plot with correct colors
@@ -188,7 +216,7 @@ class Plot:
             ax = self.give_subplot()
             ax.set_title("GC: {}".format(os.path.basename(cellobj.fn)))
         else:
-            ax = self.axes[0]
+            ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Galvanostatic Cycling")
             
         #Placing it in a plot with correct colors

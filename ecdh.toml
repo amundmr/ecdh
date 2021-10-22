@@ -7,7 +7,7 @@ files = [
 
 [settings]
 percentage = false              # Wether or not to use percentage in capacity vs cycles plot
-qcplot = false                   # Wether or not to plot capacity vs cycles
+qcplot = true                   # Wether or not to plot capacity vs cycles
 vqplot = true                   # Wether or not to plot voltage versus capacity plot (cycling curves)
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
 specific_cycles = false         # Will make global limit of cycles, can be range or list of cycles

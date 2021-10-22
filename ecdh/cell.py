@@ -36,6 +36,13 @@ class Cell:
         self.df = readers.read(self.fn)
         LOG.debug("Data has been read successfully")
 
+
+    def edit_CV_capacity(self):
+        import numpy as np
+        LOG.error("Cell.py/edit_CV_capacity has not been made! Creating data with only zeros.")
+        self.CVdata_capacity = [(np.array([[0], [0]]), np.array([[0], [0]]))]
+
+
     def edit_CV(self):
         import numpy as np
         """Takes self.df and returns self.CVdata in the format:
@@ -90,6 +97,35 @@ class Cell:
                 self.GCdata.append(cycle)
             
 
+    def edit_cyclelife(self):
+        import numpy as np
+        import pandas as pd
+        #First make sure that we have either CV capacity data or galvanostatic
+        if self.df.experiment_mode == 2:
+            if not self.CVdata_capacity:
+                LOG.error("in cell/edit_cyclelife, CVdata_capacity has not been made.")
+                self.edit_CV_capacity()
+        elif self.df.experiment_mode == 1:
+            #If the GC data doesn't exist, make it.
+            if not self.GCdata:
+                self.edit_GC()
+
+            #Make temporary dataholders
+            tmpdat = []
+            #loop through data and gather capacities
+            for i, cycle in enumerate(self.GCdata):
+                chg, dchg = cycle
+                tmpdat.append([i, chg[0][-1], dchg[0][-1]])
+
+            self.cyclelifedata = pd.DataFrame(tmpdat, columns = ["cycle", "charge capacity/mAh", "discharge capacity/mAh"])
+
+            self.cyclelifedata["coulombic efficiency"] = self.cyclelifedata["discharge capacity/mAh"] / self.cyclelifedata["charge capacity/mAh"]
+
+            print(self.cyclelifedata.head())
+
+
+        
+
     def treat_data(self, config):
         LOG.debug("Treating data")
         if config["start_cut"]:
@@ -109,9 +145,11 @@ class Cell:
         elif self.df.experiment_mode == 1:
             self.edit_GC()
             self.plotobj.plot_GC(self)
-        # Plot it
-        """if self.plotobj.qcplot == True:
-            self.plot_cyclelife(self.plotobj)
+
+        if self.plotobj.qcplot == True:
+            self.edit_cyclelife()
+            self.plotobj.plot_cyclelife(self)
+        """
         if self.plotobj.vqplot == True:
             self.plot_cycles(self.plotobj)
         if self.plotobj.dqdvplot == True:
@@ -119,19 +157,6 @@ class Cell:
         #if self.plotobj.dqdvplot == True and self.plotobj.vqplot == True:
         #    self.plot_cycles_dqdv(self.plotobj)
 
-
-    def plot_cyclelife(self, plot):
-        chgs, dischgs = self.simplify(self.charges, self.discharges) # Simplifies nested list to just capacities (and removes unwanted start cycles)
-        norm_fact = dischgs[0]
-        if plot.percentage == True: #Normalize capacities on the first cycle.
-            dischgs /= norm_fact
-            chgs /= norm_fact
-        else: # If not precentage, then it is specific
-            dischgs /= self.am_mass
-            chgs /= self.am_mass
-
-        plot.axes[0].scatter(range(len(dischgs)), dischgs, label=self.name, color = self.color)
-        plot.axes[0].scatter(range(len(chgs)), chgs, color = self.color, alpha = 0.2 )
 
     def plot_cycles(self, plot):
         cmap = plot.colormap(self.color) #create colormap for fade from basic color
