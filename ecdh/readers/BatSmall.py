@@ -108,13 +108,13 @@ def read_txt(filepath):
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
     df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to mAh/g
-    df['mode'] = 0
+    df['mode'] = expmode
     df['charge'] = True
     df.experiment_mode = expmode
     df.name = os.path.basename(filepath)
 
     check_df(df)
-
+    print(df.head(1000))
     return df
 
 def check_df(df):
@@ -127,6 +127,7 @@ def check_df(df):
 
     if df.experiment_mode == 1: #Then its GC
         if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
+            print("DOING THE STUFF=============================================")
             LOG.info("We only found one cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
 
             #We fix this by counting our own cycles.
@@ -168,5 +169,17 @@ def check_df(df):
                 LOG.info("Found {} cycles in {}".format(cycle_number, df.name))
             else:
                 LOG.info("There seems to only be one cycle. Sorry for wasting your time.")
+
+        else: #charge bool then isnt fixed
+            for i,current in df['<I>/mA'].items():
+
+                if current > 0:
+                    sign = True
+                    df['charge'].at[i-1] = True
+                elif current < 0:
+                    sign = False
+                    df['charge'].at[i-1] = False
+
+
 
                 
