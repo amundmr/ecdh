@@ -1,12 +1,11 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-	["./testdata/12_A1LNMO_E1_C1_C02.mpt","1.0"],
-	["./testdata/12_A1LNMO_E1_C2_C03.mpt","1.0"],
-	#["./testdata/HV_LNA05MO_E1_SS304_LP30_C11.mpt","1.0"],
+	["./testdata/6_LNMO_E1_C2.txt","0.0151"],
+	["./testdata/6_LNMO_E1_C3.txt","0.0135"],
 ]
 
 [settings]
-percentage = false              # Wether or not to use percentage in capacity vs cycles plot
+percentage = true              # Wether or not to use percentage in capacity vs cycles plot
 qcplot = true                   # Wether or not to plot capacity vs cycles
 vqplot = true                   # Wether or not to plot voltage versus capacity plot (cycling curves)
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
@@ -15,5 +14,5 @@ suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
 start_cut = 0
-all_in_one = true
+all_in_one = false
 fancyplot = true

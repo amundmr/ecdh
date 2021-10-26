@@ -164,6 +164,7 @@ class Plot:
     def plot_cyclelife(self, cellobj):
         """Takes a cell object and plots it in a cyclelife plot with either specific capacity or percentage on the y axis versus cycle number on the x axis"""
         data = cellobj.cyclelifedata
+
         norm_fact = data["discharge capacity/mAh"].iloc[0]
 
         if self.percentage == True: #Normalize capacities on the first cycle.

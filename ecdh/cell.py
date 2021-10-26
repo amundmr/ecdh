@@ -115,13 +115,22 @@ class Cell:
             #loop through data and gather capacities
             for i, cycle in enumerate(self.GCdata):
                 chg, dchg = cycle
-                tmpdat.append([i, chg[0][-1], dchg[0][-1]])
+                try:
+                    tmpdat.append([i, chg[0][-1], dchg[0][-1]])
+                except:
+                    try:
+                        tmpdat.append([i, chg[0][-1],0 ])
+                    except:
+                        try:
+                            tmpdat.append([i, 0, dchg[0][-1]])
+                        except:
+                            tmpdat.append([i, 0, 0])
 
             self.cyclelifedata = pd.DataFrame(tmpdat, columns = ["cycle", "charge capacity/mAh", "discharge capacity/mAh"])
 
             self.cyclelifedata["coulombic efficiency"] = self.cyclelifedata["discharge capacity/mAh"] / self.cyclelifedata["charge capacity/mAh"]
 
-            print(self.cyclelifedata.head())
+
 
 
         
