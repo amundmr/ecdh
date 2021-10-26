@@ -32,7 +32,7 @@ ecdh run config.toml
     - Plot Charge/Discharge curves over cycle life
         - Range, specific or all cycles can be plotted in addition to trimming of the first *x* cycles.
     - Plot Capacity retention over cycle life
-    - Plot dQ/dV: Smoothing coming
+    - Plot dQ/dV
     - Plot data from any number of input files
 - Cyclic Voltammetry
 
@@ -40,10 +40,13 @@ ecdh run config.toml
 
 ## Supported Input filetypes:
 
-- Neware backup files (.xlsx)
-- Neware export as general report (.csv)
 - Biologic (.mpt)
-- Batsmall (.dat)
+- BatSmall (.txt)
+
+Coming:
+
+    - Neware backup files (.xlsx)
+    - Neware export as general report (.csv)
 
 
 ## Dependencies
@@ -70,10 +73,10 @@ I have three datafiles from different equipment, but since they are all in the s
 The terminal looks like:
 
 ```
-$ python3 ../src/main.py init
+$ ecdh init
 [INFO] Wrote example configuration to 'ecdh.toml' with 3
 files found
-$ python3 ../src/main.py run ecdh.toml 
+$ ecdh run ecdh.toml 
 [INFO] Reading file: 'Neware_commasep.csv'
 [INFO] Reading file: 'Biologic-text.mpt'
 [INFO] Active mass found in file to be: 1e-06g
@@ -92,7 +95,8 @@ If I now enter the *ecdh.toml* file and set *dqdvplot = true*, *qcplot = false* 
 
 - Enable specific cycles on a per-file basis
 - Add Withaker-despiker smoothing algorithm to dQ/dV data
-- Make dQ/dV and V/Q plot in the same figure if both are to be plotted 
+- Make dQ/dV and V/Q plot in the same figure if both are to be plotted
+- Fix Neware general report .csv reader
 
 # Program structure
 
@@ -111,7 +115,7 @@ Functions:
 - Internal functions:
     - BioLogic: read_MPT()
     - Neware: read_xlsx(), read_csv()
-    - Batsmall: read_dat()
+    - Batsmall: read_txt()
 
 **cell**
 
@@ -122,7 +126,6 @@ Contains the Cell class with functions:
 - Internal functions:
     - _edit_cyclelife(): Edits data for easy cyclelife plotting
     - _edit_CV(): Edits data for easy cyclic voltammetry plotting
-    - _edit_VC(): Edits data for easy voltage versus capacity plotting
     - _edit_GC(): Edits data for easy galvanostatic cycling plotting
     - _edit_dQdV(): Edits data for easy dQdV plotting
 

@@ -7,7 +7,7 @@ files = [
 [settings]
 percentage = true              # Wether or not to use percentage in capacity vs cycles plot
 rawplot = true
-rawplot_capacity = true        # Wether or not to use cumulative capacity on x-axis
+rawplot_capacity = false        # Wether or not to use cumulative capacity on x-axis
 qcplot = false                   # Wether or not to plot capacity vs cycles
 vcplot = true                   # Wether or not to plot voltage curves (either CV og GC depending on data)
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
