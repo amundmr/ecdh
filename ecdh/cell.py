@@ -29,6 +29,8 @@ class Cell:
         self.axes = []
         self.mode_dict = {'0': 'Unspecified', '1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}
         self.specific_cycles = specific_cycles
+        self.GCdata = None
+        self.CVdata = None
 
 
     def get_data(self):
@@ -131,8 +133,12 @@ class Cell:
             self.cyclelifedata["coulombic efficiency"] = self.cyclelifedata["discharge capacity/mAh"] / self.cyclelifedata["charge capacity/mAh"]
 
 
-
-
+    def edit_cumulative_capacity(self):
+        """This function is used when you want the cumulative capacity for plotting potential and current versus capacity in a raw data plot"""
+        LOG.debug("Calculating the cumulative capcity..")
+        from scipy import integrate
+        cumulative_capacity = integrate.cumtrapz(abs(self.df["<I>/mA"]), self.df["time/s"]/3600, initial = 0)
+        self.df["CumulativeCapacity/mAh/g"] = cumulative_capacity/self.am_mass
         
 
     def treat_data(self, config):
@@ -148,22 +154,29 @@ class Cell:
                 self.charges = self.charges[self.start_cut:]
 
     def plot(self):
-        if self.df.experiment_mode == 2:
-            self.edit_CV()
-            self.plotobj.plot_CV(self)
-        elif self.df.experiment_mode == 1:
-            self.edit_GC()
-            self.plotobj.plot_GC(self)
+        if self.plotobj.vcplot:
+            if self.df.experiment_mode == 2:
+                self.edit_CV()
+                self.plotobj.plot_CV(self)
+            elif self.df.experiment_mode == 1:
+                self.edit_GC()
+                self.plotobj.plot_GC(self)
 
-        if self.plotobj.qcplot == True:
+        if self.plotobj.qcplot:
             self.edit_cyclelife()
             self.plotobj.plot_cyclelife(self)
+
+        if self.plotobj.rawplot:
+            if self.plotobj.rawplot_capacity:
+                self.edit_cumulative_capacity()
+
+            self.plotobj.plot_raw(self)
         """
-        if self.plotobj.vqplot == True:
+        if self.plotobj.vcplot == True:
             self.plot_cycles(self.plotobj)
         if self.plotobj.dqdvplot == True:
             self.plot_dqdv(self.plplotobjot)"""
-        #if self.plotobj.dqdvplot == True and self.plotobj.vqplot == True:
+        #if self.plotobj.dqdvplot == True and self.plotobj.vcplot == True:
         #    self.plot_cycles_dqdv(self.plotobj)
 
 

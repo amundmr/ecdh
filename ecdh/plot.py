@@ -17,7 +17,7 @@ import numpy as np
 # Plot class specifications:
 percentage = <bool>     // Only used when qc-plot = True and changes scale from specific capacity to percent of first cycle
 qcplot = <bool>         // Displays capacity over cycle life plot
-vqplot = <bool>         // Displays voltage versus capacity for all cycles
+vcplot = <bool>         // Displays voltage curves (either CV or GC)
 suptitle = <string>     // Changes the top title to whatever you put it to
 ylabel = <string>       // Changes y-scale label on the vq plots
 xlabel = <string>       // Changes x-scale label on the vq plots
@@ -35,13 +35,19 @@ class Plot:
             self.subplots = 1
         else:
             self.subplots = 0
+
         if self.all_in_one is True:
             self.subplots+= 1
+            if self.rawplot:
+                self.subplots += 1
         else:
-            if self.vqplot is True:
+            if self.vcplot is True:
                 self.subplots += numfiles
             
             if self.dqdvplot is True:
+                self.subplots += numfiles
+            
+            if self.rawplot:
                 self.subplots += numfiles
 
         
@@ -278,3 +284,54 @@ class Plot:
                     chg, dchg = cycle
                     ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
                     ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
+
+    def plot_raw(self,cellobj):
+        """Takes a cellobject and plots it in a raw data plot (I/mA and Ewe/V vs time/s)"""
+        LOG.debug("Running plot.py plot_raw")
+        # Get subplot from main plotclass
+        if self.all_in_one is False:
+            ax = self.give_subplot()
+            ax.set_title("raw data: {}".format(os.path.basename(cellobj.fn)))
+            #Initiate twin ax
+            ax2 = ax.twinx()
+            #self.axes.append(ax2)
+        else:
+            if self.qcplot and self.rawplot:
+                ax = self.axes[2]
+            elif self.qcplot or self.rawplot: 
+                ax = self.axes[1]
+            else:
+                ax = self.axes[0]
+            #Initiate twin axis, only if it doesnt exist aleady
+            if not self.has_twin(ax):
+                ax2 = ax.twinx()
+                #self.axes.append(ax2)
+            else: #Exists already, we need to get the twin ax
+                ax2 = self.has_twin(ax)
+
+            ax.set_title("Raw data")
+            
+        #Placing it in a plot
+        if self.rawplot_capacity:
+            x = cellobj.df["CumulativeCapacity/mAh/g"]
+            ax.set_xlabel(r"Cumulative Capacity [$\frac{mAh}{g}$]")
+        else:
+            x = cellobj.df["time/s"]/3600
+            ax.set_xlabel("Time [h]")
+
+        ax.plot(x, cellobj.df["Ewe/V"], color = cellobj.color)
+        ax2.plot(x, cellobj.df["<I>/mA"], color = cellobj.color, linestyle = "dotted")
+
+
+        ax.set_ylabel("Potential [V]")
+        ax2.set_ylabel("Current [mA]")
+        
+
+
+    def has_twin(self,ax):
+        for other_ax in self.axes:
+            if other_ax is ax:
+                continue
+            if other_ax.bbox.bounds == ax.bbox.bounds:
+                return other_ax
+        return False
