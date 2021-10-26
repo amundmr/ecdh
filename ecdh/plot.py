@@ -99,6 +99,9 @@ class Plot:
                 xlabel = 'Cycles'
             )
 
+        if self.rawplot and self.all_in_one:
+            self.axtwinx = None
+
     def give_subplot(self):
         ax = self.axes[self.taken_subplots]
         self.taken_subplots += 1 #Increment the subplots availability and give it to whomever.
@@ -303,11 +306,9 @@ class Plot:
             else:
                 ax = self.axes[0]
             #Initiate twin axis, only if it doesnt exist aleady
-            if not self.has_twin(ax):
-                ax2 = ax.twinx()
-                #self.axes.append(ax2)
-            else: #Exists already, we need to get the twin ax
-                ax2 = self.has_twin(ax)
+            if not self.axtwinx:
+                self.axtwinx = ax.twinx()
+            ax2 = self.axtwinx
 
             ax.set_title("Raw data")
             
@@ -326,12 +327,3 @@ class Plot:
         ax.set_ylabel("Potential [V]")
         ax2.set_ylabel("Current [mA]")
         
-
-
-    def has_twin(self,ax):
-        for other_ax in self.axes:
-            if other_ax is ax:
-                continue
-            if other_ax.bbox.bounds == ax.bbox.bounds:
-                return other_ax
-        return False
