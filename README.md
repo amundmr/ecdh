@@ -3,9 +3,15 @@
 edch provides easy solutions for simple handling of electrochemical data. Most emphasis is so far put on how to display the data using matplotlib.
 
 
+## Installation
+
+ecdh is hosted on pypi, and can be installed via pip by:
+```pip install ecdh```
+
+
 ## Usage:
 
-Run ```src/main.py``` with python3.
+run ```ecdh```.
 
 Command line arguments:
 
@@ -14,8 +20,9 @@ Command line arguments:
 
 Example use:
 ```
-python3 src/main.py init
-python3 src/main.py run ecdh.toml 
+ecdh
+ecdh init
+ecdh run config.toml
 ```
 
 
@@ -28,7 +35,7 @@ python3 src/main.py run ecdh.toml
     - Plot dQ/dV: Smoothing coming
     - Plot data from any number of input files
 - Cyclic Voltammetry
-    - Still in the works...
+
 
 
 ## Supported Input filetypes:
