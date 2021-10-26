@@ -1,27 +1,24 @@
-import pathlib
-from setuptools import setup
+import setuptools
 
-# The directory containing this file
-HERE = pathlib.Path(__file__).parent
-
-# The text of the README file
-README = (HERE / "README.md").read_text()
+with open("README.md", "r") as fh:
+    long_description = fh.read()
 
 
-setup(
+setuptools.setup(
     name = 'ecdh',
-    packages = ['ecdh'],
+    scripts = ['ecdh'],
     include_package_data = True,
     version = '0.1.2',     # Remember to update on new version
     license='GNU General Public License v3.0',        
-    description = 'ElectroChemical Data handler',
-    long_description=README,
+    description = 'ElectroChemical Data Handler',
+    long_description=long_description,
     long_description_content_type="text/markdown",
     author = 'Amund Raniseth',                   
     author_email = 'amund.raniseth@gmail.com',      
     url = 'https://github.com/amundmr/ecdh',   
     download_url = 'https://github.com/amundmr/ecdh/archive/refs/tags/v0.1.2.tar.gz',    # Remember to update this with new versions
     keywords = ['Electrochemical', 'battery', 'cell', 'datareader', 'dataplotter', 'reader', 'plotter'],
+    packages = setuptools.find_packages(),
     install_requires=[
             'matplotlib',
             'numpy',
