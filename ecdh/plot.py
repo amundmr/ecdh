@@ -29,7 +29,6 @@ class Plot:
         for key in kwargs:
             setattr(self, key, kwargs[key])
         self.taken_subplots = 0
-        #print(self.percentage)
         
         # Finding number of subplots
         if self.qcplot is True:

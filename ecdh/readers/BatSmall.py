@@ -36,7 +36,7 @@ def dat_batsmall_to_vq(filename):
     capacities = []
 
     for line in data[:-1]:
-        #print(line.split(";"))
+
         try:
             v = float(eval(line.split(";")[1]))
             q = abs(float(eval(line.split(";")[3])))
@@ -44,22 +44,18 @@ def dat_batsmall_to_vq(filename):
             capacities.append(q)
         except:
             if '"V";I:"A";C:"Ah/kg"' in line and charge == True:
-                #print("Charge end at: V: %.5f, Q: %.5f" %(v,q))
+                #LOG.debug("Charge end at: V: %.5f, Q: %.5f" %(v,q))
                 charges.append((np.array(voltages), np.array(capacities)))
                 charge = False
                 voltages = []
                 capacities = []
             elif '"V";I:"A";C:"Ah/kg"' in line and charge == False:
-                #print("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
+                #LOG.debug("Discharge end at: V: %.5f, Q: %.5f" %(v,q))
                 discharges.append((np.array(voltages), np.array(capacities)))
                 charge = True
                 voltages = []
                 capacities = []
 
-        
-    
-    #print(charges)
-    #print(discharges)
     return charges, discharges
 
 def read_txt(filepath):
@@ -114,7 +110,7 @@ def read_txt(filepath):
     df.name = os.path.basename(filepath)
 
     check_df(df)
-    print(df.head(1000))
+
     return df
 
 def check_df(df):
@@ -127,7 +123,6 @@ def check_df(df):
 
     if df.experiment_mode == 1: #Then its GC
         if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
-            print("DOING THE STUFF=============================================")
             LOG.info("We only found one cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
 
             #We fix this by counting our own cycles.
