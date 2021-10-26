@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name = 'ecdh',
-    scripts = ['ecdh'],
+    packages = ['ecdh'],
     include_package_data = True,
     version = '0.1.3',     # Remember to update on new version
     license='GNU General Public License v3.0',        
@@ -18,7 +18,6 @@ setuptools.setup(
     url = 'https://github.com/amundmr/ecdh',   
     download_url = 'https://github.com/amundmr/ecdh/archive/refs/tags/v0.1.3.tar.gz',    # Remember to update this with new versions
     keywords = ['Electrochemical', 'battery', 'cell', 'datareader', 'dataplotter', 'reader', 'plotter'],
-    packages = setuptools.find_packages(),
     install_requires=[
             'matplotlib',
             'numpy',

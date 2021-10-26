@@ -31,6 +31,7 @@ class Cell:
         self.specific_cycles = specific_cycles
         self.GCdata = None
         self.CVdata = None
+        self.CVdata_capacity = None
 
 
     def get_data(self):
@@ -106,7 +107,8 @@ class Cell:
         if self.df.experiment_mode == 2:
             if not self.CVdata_capacity:
                 LOG.error("in cell/edit_cyclelife, CVdata_capacity has not been made.")
-                self.edit_CV_capacity()
+                self.edit_CV_capacity() 
+
         elif self.df.experiment_mode == 1:
             #If the GC data doesn't exist, make it.
             if not self.GCdata:
