@@ -239,6 +239,7 @@ class Cell:
                 self.discharges = self.discharges[self.start_cut:]
                 self.charges = self.charges[self.start_cut:]
 
+
     def plot(self):
         if self.plotobj.vcplot:
             if self.df.experiment_mode == 2:
@@ -261,61 +262,3 @@ class Cell:
         if self.plotobj.dqdvplot:
             self.edic_dQdV()
             self.plotobj.plot_dQdV(self)
-
-
-    def plot_cycles(self, plot):
-        cmap = plot.colormap(self.color) #create colormap for fade from basic color
-        # Slice to remove initial cycles Division by am mass to get specific capacity
-        chg = self.charges
-        dchg = self.discharges
-        #Define lengths for use with colors
-        Nc = len(chg)
-        Nd = len(dchg)
-
-        ax = plot.give_subplot() #Recieve correct subplot axis object from plot
-        self.axes.append(ax)
-
-        if type(plot.specific_cycles) != bool:
-            for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                if i in plot.specific_cycles: 
-                    ax.plot(charge_cycle[1]/self.am_mass, charge_cycle[0],  c = plot.cycle_color(i))
-                    ax.plot(discharge_cycle[1]/self.am_mass, discharge_cycle[0], label = make_label(i), c = plot.cycle_color(i))
-                ax.legend()
-        else:
-            for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                ax.plot(charge_cycle[1]/self.am_mass, charge_cycle[0],  c = cmap(i/Nc))
-                ax.plot(discharge_cycle[1]/self.am_mass, discharge_cycle[0],  c = cmap(i/Nd))
-
-            # Adding colorbar to plot
-            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nd))
-            sm._A = []
-            plot.fig.colorbar(sm, ax=ax, label = "Cycle number")
-
-        # Fixing title
-        title = "VQ: " + os.path.basename(self.fn)
-        ax.set_title(title)
-
-        
-
-    
-
-    def simplify(self, chg, dchg):
-        # Takes two lists of complete cycle data and returns max capacity for each cycle.
-        # chg = [cycle1, cycle2, cycle3 , ... , cycleN]
-        # cycle1 = [[v1, v2, v3, ..., vn],[q1, q2, q3, ..., qn]]
-        # This func basically just pulls qn from every cycle and creates a new array with it.
-        import numpy as np
-
-        charges = np.zeros(len(chg))
-        discharges = np.zeros(len(dchg))
-        for i, cycle in enumerate(chg):
-            try:
-                charges[i] = cycle[1][-1]
-            except:
-                charges[i] = 0
-        for i, cycle in enumerate(dchg):
-            try:
-                discharges[i] = cycle[1][-1]
-            except:
-                discharges[i] = 0
-        return charges, discharges
