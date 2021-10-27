@@ -42,7 +42,12 @@ def run():
     # Run the data reading + plot generation
     cells = []
     for f in files:
-        cell = Cell(f[0], f[1], plot=plot)
+        try:
+            am_mass = f[1]
+        except:
+            am_mass = None
+
+        cell = Cell(f[0], am_mass, plot=plot)
         cell.get_data()
         #cell.edit_GC()
         #cell.treat_data(settings)

@@ -22,7 +22,10 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 class Cell:
     def __init__(self, filename, am_mass, plot = None, specific_cycles = None):
         self.fn = filename
-        self.am_mass = float(am_mass)
+        try:
+            self.am_mass = float(am_mass)
+        except:
+            self.am_mass = None
         self.color = plot.get_color()
         self.name = os.path.basename(filename)
         self.plotobj = plot
@@ -94,7 +97,15 @@ class Cell:
                 chgdat = subframe[subframe['charge'] == True]
                 dchgdat = subframe[subframe['charge'] == False]
 
-                
+                if self.am_mass:
+                    #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
+                    from scipy import integrate
+                    #Integrate current over time, returns mAh
+                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)
+                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)
+                    #Divide by active mass in order to get mAh/g
+                    chgdat['capacity/mAhg'] /= self.am_mass
+                    dchgdat['capacity/mAhg'] /= self.am_mass
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
@@ -143,6 +154,10 @@ class Cell:
         self.df["CumulativeCapacity/mAh/g"] = cumulative_capacity/self.am_mass
         
 
+    def edic_dQdV(self):
+        LOG.error("dQdV calculator hasnt been implemented yet (edit_dQdV in cell.py)")
+
+
     def treat_data(self, config):
         LOG.debug("Treating data")
         if config["start_cut"]:
@@ -173,13 +188,10 @@ class Cell:
                 self.edit_cumulative_capacity()
 
             self.plotobj.plot_raw(self)
-        """
-        if self.plotobj.vcplot == True:
-            self.plot_cycles(self.plotobj)
-        if self.plotobj.dqdvplot == True:
-            self.plot_dqdv(self.plplotobjot)"""
-        #if self.plotobj.dqdvplot == True and self.plotobj.vcplot == True:
-        #    self.plot_cycles_dqdv(self.plotobj)
+
+        if self.plotobj.dqdvplot:
+            self.edic_dQdV()
+            self.plotobj.plot_dQdV(self)
 
 
     def plot_cycles(self, plot):
@@ -216,36 +228,7 @@ class Cell:
 
         
 
-    def plot_dqdv(self, plot):
-        cmap = plot.colormap(self.color) #create colormap for fade from basic color
-        # Slice to remove initial cycles Division by am mass to get specific capacity
-        chg, dchg = make_dQdV(self.charges[self.start_cut:], self.discharges[self.start_cut:])
-        #Define lengths for use with colors
-        Nc = len(chg)
-        Nd = len(dchg)
-
-        ax = plot.give_subplot() #Recieve correct subplot axis object from plot
-        self.axes.append(ax)
-
-        if type(plot.specific_cycles) != bool:
-            for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                if i in plot.specific_cycles:
-                    ax.plot(charge_cycle[1], charge_cycle[0],  c = plot.cycle_color(i))
-                    ax.plot(discharge_cycle[1], discharge_cycle[0],  label = make_label(i), c = plot.cycle_color(i))
-                ax.legend()
-        else:
-            for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                ax.plot(charge_cycle[1], charge_cycle[0],  c = cmap(i/Nc))
-                ax.plot(discharge_cycle[1], discharge_cycle[0],  c = cmap(i/Nd))
-            # Adding colorbar to plot
-            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nd))
-            sm._A = []
-            plot.fig.colorbar(sm, ax=ax, label = "Cycle number")
-
-        # Fixing title
-        title =  "dQ/dV: " + os.path.basename(self.fn)
-        ax.set_title(title)
-        ax.set(ylabel = "Potential [V]", xlabel = "dQ/dV [mAh/Vg]")
+    
 
     def simplify(self, chg, dchg):
         # Takes two lists of complete cycle data and returns max capacity for each cycle.

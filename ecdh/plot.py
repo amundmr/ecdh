@@ -288,6 +288,40 @@ class Plot:
                     ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
                     ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
 
+
+    def plot_dQdV(self, plot):
+            """cmap = plot.colormap(self.color) #create colormap for fade from basic color
+            # Slice to remove initial cycles Division by am mass to get specific capacity
+            chg, dchg = make_dQdV(self.charges[self.start_cut:], self.discharges[self.start_cut:])
+            #Define lengths for use with colors
+            Nc = len(chg)
+            Nd = len(dchg)
+
+            ax = plot.give_subplot() #Recieve correct subplot axis object from plot
+            self.axes.append(ax)
+
+            if type(plot.specific_cycles) != bool:
+                for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
+                    if i in plot.specific_cycles:
+                        ax.plot(charge_cycle[1], charge_cycle[0],  c = plot.cycle_color(i))
+                        ax.plot(discharge_cycle[1], discharge_cycle[0],  label = make_label(i), c = plot.cycle_color(i))
+                    ax.legend()
+            else:
+                for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
+                    ax.plot(charge_cycle[1], charge_cycle[0],  c = cmap(i/Nc))
+                    ax.plot(discharge_cycle[1], discharge_cycle[0],  c = cmap(i/Nd))
+                # Adding colorbar to plot
+                sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nd))
+                sm._A = []
+                plot.fig.colorbar(sm, ax=ax, label = "Cycle number")
+
+            # Fixing title
+            title =  "dQ/dV: " + os.path.basename(self.fn)
+            ax.set_title(title)
+            ax.set(ylabel = "Potential [V]", xlabel = "dQ/dV [mAh/Vg]")"""
+            return 1
+
+
     def plot_raw(self,cellobj):
         """Takes a cellobject and plots it in a raw data plot (I/mA and Ewe/V vs time/s)"""
         LOG.debug("Running plot.py plot_raw")
