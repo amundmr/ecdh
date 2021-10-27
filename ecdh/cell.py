@@ -100,12 +100,10 @@ class Cell:
                 if self.am_mass:
                     #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
                     from scipy import integrate
-                    #Integrate current over time, returns mAh
-                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)
-                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)
-                    #Divide by active mass in order to get mAh/g
-                    chgdat['capacity/mAhg'] /= self.am_mass
-                    dchgdat['capacity/mAhg'] /= self.am_mass
+                    #Integrate current over time, returns mAh, divide by active mass to get gravimetric
+                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
+
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
@@ -155,7 +153,78 @@ class Cell:
         
 
     def edic_dQdV(self):
-        LOG.error("dQdV calculator hasnt been implemented yet (edit_dQdV in cell.py)")
+        import numpy as np
+        """Takes self.df and returns self.dQdVdata in the format:
+        self.dQdVdata = [cycle1, cycle2, cycle3, ... , cycleN]
+        cyclex = (chg, dchg)
+        chg = np.array([[v1, v2, v3, ..., vn],[dqdv1, dqdv2, dqdv3, ..., dqdvn]]) where dqdv is dQ/dV"""
+        if self.df.experiment_mode != 1: #If the data gathered isn't a galvanostatic experiment, then this doesn't work!
+            LOG.warning("File '{}' is not a GC file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
+        else:
+            self.dQdVdata = []
+
+            #Remove all datapoints where mode != 1, we dont care about other data than GC here.
+            index_names = self.df[self.df['mode'] != 1].index
+            rawGCdata = self.df.drop(index_names)
+            
+            for cycle, subframe in rawGCdata.groupby('cycle number'):
+
+                #Split into charge and discharge data
+                chgdat = subframe[subframe['charge'] == True]
+                dchgdat = subframe[subframe['charge'] == False]
+
+                #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
+                if self.am_mass:
+                    from scipy import integrate
+                    #Integrate current over time, returns mAh, divide by active mass to get gravimetric.
+                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/ self.am_mass
+                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
+                
+                def binit(x,y, Nbins = 120):
+                    # extract 120 elements evenly spaced in the data
+                    Nbins = 120
+                    binsize = int(len(x)/Nbins)
+                    if binsize == 0: # modulo by zero not allowed so filtering that here
+                        return [0], [0]
+
+                    i = 0
+                    xar = []
+                    yar = []
+                    for i,(x,y) in enumerate(zip(x,y)):
+                        if i%binsize == 0:
+                            xar.append(x)
+                            yar.append(y)
+                    return xar, yar
+               
+                def moving_average(x,y, w=9):
+                    if len(x) < w + 1 or len(y) < w + 1:
+                        return [0], [0]
+
+                    from scipy.signal import savgol_filter
+                    # Savitzky-Golay filter
+                    #y = savgol_filter(y, w, 3)
+                    #x = savgol_filter(x, w, 3)
+                    #Simple Moving average
+                    x = np.convolve(x, np.ones(w), 'valid') / w
+                    y = np.convolve(y, np.ones(w), 'valid') / w
+                    return x, y
+
+                def get_dqdv(x,y):
+                    x,y = binit(x,y)
+                    x,y = moving_average(x,y)
+
+                    if len(x)< 2 or len(y) < 2:
+                        return [0],[0]
+
+                    dqdv = np.log(np.diff(x)/np.diff(y))
+                    v = y[:-1]
+                    return dqdv, v
+
+                chg_dqdv, chg_v = get_dqdv(chgdat['capacity/mAhg'], chgdat['Ewe/V'])
+                dchg_dqdv, dchg_v = get_dqdv(dchgdat['capacity/mAhg'], dchgdat['Ewe/V'])
+
+                cycle = (np.array([chg_v, chg_dqdv]), np.array([dchg_v, dchg_dqdv]))
+                self.dQdVdata.append(cycle)
 
 
     def treat_data(self, config):

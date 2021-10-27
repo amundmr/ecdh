@@ -36,9 +36,12 @@ class Plot:
         else:
             self.subplots = 0
 
-        if self.all_in_one is True:
-            self.subplots+= 1
+        if self.all_in_one:
+            if self.vcplot:
+                self.subplots+= 1
             if self.rawplot:
+                self.subplots += 1
+            if self.dqdvplot:
                 self.subplots += 1
         else:
             if self.vcplot is True:
@@ -289,37 +292,24 @@ class Plot:
                     ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
 
 
-    def plot_dQdV(self, plot):
-            """cmap = plot.colormap(self.color) #create colormap for fade from basic color
-            # Slice to remove initial cycles Division by am mass to get specific capacity
-            chg, dchg = make_dQdV(self.charges[self.start_cut:], self.discharges[self.start_cut:])
-            #Define lengths for use with colors
-            Nc = len(chg)
-            Nd = len(dchg)
+    def plot_dQdV(self, cellobj):
+        """Takes a cell dataframe and plots it in a dQdV plot (dQdV/mAhVg vs Ewe/V)"""
+        LOG.debug("Running plot.py plot_dQdV")
 
-            ax = plot.give_subplot() #Recieve correct subplot axis object from plot
-            self.axes.append(ax)
+        # Get subplot from main plotclass
+        if self.all_in_one is False:
+            ax = self.give_subplot()
+            ax.set_title("dQdV: {}".format(os.path.basename(cellobj.fn)))
+        else:
+            ax = self.axes[0] if self.qcplot is False else self.axes[1]
+            ax.set_title("dQdV")
+            
+        #Placing it in a plot with correct colors
+        self.insert_cycle_data(cellobj, ax, cellobj.dQdVdata)
 
-            if type(plot.specific_cycles) != bool:
-                for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                    if i in plot.specific_cycles:
-                        ax.plot(charge_cycle[1], charge_cycle[0],  c = plot.cycle_color(i))
-                        ax.plot(discharge_cycle[1], discharge_cycle[0],  label = make_label(i), c = plot.cycle_color(i))
-                    ax.legend()
-            else:
-                for i, (charge_cycle, discharge_cycle) in enumerate(zip(chg, dchg)):
-                    ax.plot(charge_cycle[1], charge_cycle[0],  c = cmap(i/Nc))
-                    ax.plot(discharge_cycle[1], discharge_cycle[0],  c = cmap(i/Nd))
-                # Adding colorbar to plot
-                sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nd))
-                sm._A = []
-                plot.fig.colorbar(sm, ax=ax, label = "Cycle number")
-
-            # Fixing title
-            title =  "dQ/dV: " + os.path.basename(self.fn)
-            ax.set_title(title)
-            ax.set(ylabel = "Potential [V]", xlabel = "dQ/dV [mAh/Vg]")"""
-            return 1
+        
+        ax.set_ylabel(r"dQ/dV [$log\left(\frac{mAh}{Vg}\right)$ smoothed]")
+        ax.set_xlabel("Potential [V]")
 
 
     def plot_raw(self,cellobj):
