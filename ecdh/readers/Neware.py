@@ -1,10 +1,48 @@
 
 """Data-readers for Neware"""
+import pandas as pd
+import numpy as np
+import gc
 from ecdh.log import LOG
 LOG.error("NEWARE READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
 def read_csv(filepath):
+    
+    """
+    Reads a .csv file from Neware general report
+    
+    .csv format:
+    
+    """
     LOG.debug(f"Reading Neware CSV: '{filepath}'")
-    import numpy as np
+
+    # Open file
+    with open(filepath, 'r') as f:
+        lines = f.readlines()
+
+    # Read all data to pandas dataframe
+    big_df = pd.read_csv(filepath, header = 2)
+    pd.DataFrame.fillna(big_df, method='ffill', inplace = True)
+    print(big_df.columns)
+    df = big_df.loc[:,('\tTime(h:min:s.ms)', '\tVoltage(V)', '\tCurrent(mA)', 'Unnamed: 0', '\tCapacity Density(mAh/g)')]
+    del big_df #deletes the dataframe
+    gc.collect() #Clean unused memory (which is the dataframe above)
+    print(df.head)
+    df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] 
+    print(df.columns)
+    print(df['time/s'].iloc[1])
+    def _time_parser(string):
+        """Takes neware string of time and returns float in seconds"""
+        print(string)
+        string = string[2:]
+        nums = string.split(":")
+        hours = float(nums[0])
+        mins = float(nums[1])
+        secs = float(nums[2])
+        return hours*3600 + mins*60 + secs
+
+    df['time/s'] = df['time/s'].apply(lambda x: _time_parser(x)) #Converting from h to s
+    print(df.head)
+    """import numpy as np
     #Open file
     with open(filepath, 'r', encoding = "ISO-8859-1") as f:
         #Read the first 2 lines which doesnt contain any data
@@ -82,7 +120,7 @@ def read_csv(filepath):
         discharges.append((voltages, capacities))
 
             
-    return charges, discharges
+    return charges, discharges"""
 
 
 def read_xlsx(filename):

@@ -70,6 +70,7 @@ def read_txt(filepath):
     import pandas as pd
     import numpy as np
     import os
+    import gc
 
     # Open file
     with open(filepath, 'r') as f:
@@ -97,10 +98,12 @@ def read_txt(filepath):
 
     # Read all data to a pandas dataframe
     big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
-
+    
     #Extract useful columns, change the name of the columns, make all numbers numbers.
     df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []', 'C [mAh/kg]']]
-    df.rename(columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
+    del big_df #deletes the dataframe
+    gc.collect() #Clean unused memory (which is the dataframe above)
+    df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] #Renaming the columns. columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
     df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to mAh/g
@@ -108,7 +111,7 @@ def read_txt(filepath):
     df['charge'] = True
     df.experiment_mode = expmode
     df.name = os.path.basename(filepath)
-
+    
     check_df(df)
 
     return df

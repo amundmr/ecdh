@@ -1,7 +1,6 @@
 # Data path and active mass (set to 1 if data is normalized with regards to active mass)
 files = [
-	["./testdata/6_LNMO_E1_C2.txt", "0.00579"],
-	["./testdata/6_LNMO_E1_C3.txt","0.00450"],
+	["./testdata/MR_B_057.csv", "1.0"],
 ]
 
 [settings]

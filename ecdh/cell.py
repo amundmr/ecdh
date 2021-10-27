@@ -78,6 +78,7 @@ class Cell:
 
     def edit_GC(self):
         import numpy as np
+        import pandas as pd
         """Takes self.df and returns self.GCdata in the format:
         self.GCdata = [cycle1, cycle2, cycle3, ... , cycleN]
         cyclex = (chg, dchg)
@@ -94,15 +95,15 @@ class Cell:
             for cycle, subframe in rawGCdata.groupby('cycle number'):
 
                 #Split into charge and discharge data
-                chgdat = subframe[subframe['charge'] == True]
-                dchgdat = subframe[subframe['charge'] == False]
+                chgdat = subframe[subframe['charge'] == True].copy(deep=True)
+                dchgdat = subframe[subframe['charge'] == False].copy(deep=True)
 
                 if self.am_mass:
                     #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric
-                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/self.am_mass
-                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
 
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
@@ -154,6 +155,7 @@ class Cell:
 
     def edic_dQdV(self):
         import numpy as np
+        import pandas as pd
         """Takes self.df and returns self.dQdVdata in the format:
         self.dQdVdata = [cycle1, cycle2, cycle3, ... , cycleN]
         cyclex = (chg, dchg)
@@ -162,7 +164,7 @@ class Cell:
             LOG.warning("File '{}' is not a GC file! It is a {} file.".format(self.fn, self.mode_dict[str(self.df.experiment_mode)]))
         else:
             self.dQdVdata = []
-
+            
             #Remove all datapoints where mode != 1, we dont care about other data than GC here.
             index_names = self.df[self.df['mode'] != 1].index
             rawGCdata = self.df.drop(index_names)
@@ -170,15 +172,15 @@ class Cell:
             for cycle, subframe in rawGCdata.groupby('cycle number'):
 
                 #Split into charge and discharge data
-                chgdat = subframe[subframe['charge'] == True]
-                dchgdat = subframe[subframe['charge'] == False]
+                chgdat = subframe[subframe['charge'] == True].copy(deep=True)
+                dchgdat = subframe[subframe['charge'] == False].copy(deep=True)
 
                 #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
                 if self.am_mass:
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric.
-                    chgdat['capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/ self.am_mass
-                    dchgdat['capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
+                    chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/ self.am_mass
+                    dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
                 
                 def binit(x,y, Nbins = 120):
                     # extract 120 elements evenly spaced in the data

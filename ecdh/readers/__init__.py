@@ -22,8 +22,6 @@ def read(filepath):
         df = NA.read_csv(filepath) #but this gives nested list with V/q data for each cycle.
     elif ext == ".mpt":
         df = BL.read_mpt(filepath)
-    elif ext == ".customexport":
-        df = BL.custom_EC_export(filepath)
     elif ext == ".txt":
         df = BS.read_txt(filepath)
     else:
