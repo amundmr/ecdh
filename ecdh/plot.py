@@ -182,9 +182,8 @@ class Plot:
         if self.percentage == True: #Normalize capacities on the first cycle.
             data["discharge capacity/mAh"] = data["discharge capacity/mAh"] / norm_fact
             data["charge capacity/mAh"] = data["charge capacity/mAh"] / norm_fact
-        else: # If not precentage, then it is specific
-            data["discharge capacity/mAh"] = data["discharge capacity/mAh"] / cellobj.am_mass
-            data["charge capacity/mAh"] = data["charge capacity/mAh"] / cellobj.am_mass
+        # If not precentage, then it is just the raw data which has already been handled in edit_GC
+
 
         ax = self.axes[0]   #Getting the right plot
         Nc = cellobj.cyclelifedata.count      #finding max number of cycles

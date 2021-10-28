@@ -30,14 +30,33 @@ def read_mpt(filepath):
             headerlines = int(line.split(':')[-1])
             break #breaks for loop when headerlines is found
     
-    for line in lines:
+    for i,line in enumerate(lines):
+        #You wont find Characteristic mass outside of headerlines.
+        if headerlines > 0:
+            if i > headerlines:
+                break
+        
         if "Characteristic mass :" in line:
             active_mass = float(line.split(':')[-1][:-3].replace(',', '.'))/1000
             LOG.debug("Active mass found in file to be: " + str(active_mass) + "g")
             break #breaks loop when active mass is found
 
+    # pandas.read_csv command automatically skips white lines, meaning that we need to subtract this from the amout of headerlines for the function to work.
+    whitelines = 0
+    for i, line in enumerate(lines):
+        #we dont care about outside of headerlines.
+        if headerlines > 0:
+            if i > headerlines:
+                break
+        if line == "\n":
+            whitelines += 1
 
-    big_df = pd.read_csv(filepath, header=headerlines-1, sep="\t", encoding = "ISO-8859-1")
+    #Remove lines object
+    del lines
+    gc.collect()
+
+
+    big_df = pd.read_csv(filepath, header=headerlines-whitelines-1, sep = "\t", encoding = "ISO-8859-1")
     LOG.debug("Dataframe column names: {}".format(big_df.columns))
 
     # Start filling dataframe

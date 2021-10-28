@@ -20,17 +20,18 @@ def read_csv(filepath):
         lines = f.readlines()
 
     # Read all data to pandas dataframe
-    big_df = pd.read_csv(filepath, header = 2, sep=",")
+    big_df = pd.read_csv(filepath, header = 2, delim_whitespace=True)
     pd.DataFrame.fillna(big_df, method='ffill', inplace = True)
-    print(big_df["Unnamed: 0"].head)
+    #print(big_df["Unnamed: 0"].head)
     print(big_df.columns)
-    df = big_df.loc[:,('\tTime(h:min:s.ms)', '\tVoltage(V)', '\tCurrent(mA)', 'Unnamed: 0', '\tCapacity Density(mAh/g)')]
+    print(big_df.head)
+    #df = big_df.loc[:,('\tTime(h:min:s.ms)', '\tVoltage(V)', '\tCurrent(mA)', 'Unnamed: 0', '\tCapacity Density(mAh/g)')]
     del big_df #deletes the dataframe
     gc.collect() #Clean unused memory (which is the dataframe above)
-    print(df.head)
-    df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] 
-    print(df.columns)
-    print(df['time/s'].iloc[1])
+    #print(df.head)
+    #df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] 
+    #print(df.columns)
+    #print(df['time/s'].iloc[1])
     def _time_parser(string):
         """Takes neware string of time and returns float in seconds"""
         print(string)

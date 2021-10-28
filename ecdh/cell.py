@@ -103,8 +103,15 @@ class Cell:
                     #The inserted Active material mass might differ from the one the software calculated. Thus we make our own capacity calculations.
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric
-                    chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/self.am_mass
-                    dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    #Placed inside try/except because sometimes the lenght of chgdat["<I>/mA"] or dch is 0 (when the cycle has started but the second redox mode hasnt started), then cumtrapz will fail.
+                    try:
+                        chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    except:
+                        chgdat.loc[:,'capacity/mAhg'] = 0
+                    try:
+                        dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
+                    except:
+                        dchgdat.loc[:,'capacity/mAhg'] = 0
 
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
