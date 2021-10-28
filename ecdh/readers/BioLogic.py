@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """Data-readers for BioLogic"""
 
 from ecdh.log import LOG
@@ -8,6 +9,7 @@ import gc
 
 def read_mpt(filepath):
     """
+    Author: Amund M. Raniseth
     Reads an mpt file to a pandas dataframe
     
     .MPT format:

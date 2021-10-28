@@ -1,7 +1,7 @@
-
+# -*- coding: utf-8 -*-
 """Data-readers for Neware"""
 import pandas as pd
-import numpy as np
+import numpy as np      
 import gc
 from ecdh.log import LOG
 LOG.error("NEWARE READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
@@ -20,8 +20,9 @@ def read_csv(filepath):
         lines = f.readlines()
 
     # Read all data to pandas dataframe
-    big_df = pd.read_csv(filepath, header = 2)
+    big_df = pd.read_csv(filepath, header = 2, sep=",")
     pd.DataFrame.fillna(big_df, method='ffill', inplace = True)
+    print(big_df["Unnamed: 0"].head)
     print(big_df.columns)
     df = big_df.loc[:,('\tTime(h:min:s.ms)', '\tVoltage(V)', '\tCurrent(mA)', 'Unnamed: 0', '\tCapacity Density(mAh/g)')]
     del big_df #deletes the dataframe

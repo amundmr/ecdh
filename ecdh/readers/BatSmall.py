@@ -1,7 +1,8 @@
+# -*- coding: utf-8 -*-
 """Data-readers for Neware"""
 
 from ecdh.log import LOG
-def dat_batsmall_to_vq(filename):
+def dat_batsmall_to_vq(filename): #NOT USING PD DATAFRAME YET
     import numpy as np
     data = []
     decode_errors = 0
@@ -60,6 +61,7 @@ def dat_batsmall_to_vq(filename):
 
 def read_txt(filepath):
     """
+    Author: Amund M. Raniseth
     Reads a txt file to a pandas dataframe
 
     .txt format:

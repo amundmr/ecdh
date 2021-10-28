@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Custom logger
 Author: Knut Magnus Aasrud, from here: https://github.com/kmaasrud/doctor/blob/f6eea662de64dd2fa7a19548e71790ebd5084f3c/kodb/log.py

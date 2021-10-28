@@ -1,3 +1,23 @@
+# -*- coding: utf-8 -*-
+
+"""
+Author: Amund M. Raniseth
+Readers take care of getting the data from the input file. 
+
+Input: the filepath of any compatible datafile
+
+Returns: pandas dataframe with 
+
+    Columns:
+    ['mode', 'charge', 'time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg']
+
+    Other variables:
+    df.experiment_mode
+    df.name
+    where experiment mode is the most present mode in the 'mode' column and the modes are:
+    1=Galvanostatic, 2=Linear Potential Sweep, 3=Rest
+"""
+
 from ecdh.log import LOG
 from ecdh.readers import (
     BatSmall as BS, 
