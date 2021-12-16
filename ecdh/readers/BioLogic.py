@@ -65,6 +65,8 @@ def read_mpt(filepath):
     elif '<I>/mA' in big_df.columns:
         current_header = '<I>/mA'
     df = big_df[['mode', 'time/s', 'Ewe/V', current_header, 'cycle number', 'ox/red']]
+    # Change headers of df to be correct
+    df.rename(columns={current_header: '<I>/mA'}, inplace=True)
 
     # If it's galvanostatic we want the capacity
     mode = df['mode'].value_counts() #Find occurences of modes
