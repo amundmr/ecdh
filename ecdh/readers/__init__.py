@@ -19,11 +19,6 @@ Returns: pandas dataframe with
 """
 
 from ecdh.log import LOG
-from ecdh.readers import (
-    BatSmall as BS, 
-    BioLogic as BL, 
-    Neware as NA
-)
 
 from ecdh import utils
 
@@ -37,12 +32,16 @@ def read(filepath):
     fn, ext = os.path.splitext(filepath)
     LOG.debug(f"Reading file: '{filepath}'")
     if ext == ".xlsx":
+        from ecdh.readers import Neware as NA
         df = NA.read_xlsx(filepath)
     elif ext == ".csv":
+        from ecdh.readers import Neware as NA
         df = NA.read_csv(filepath) #but this gives nested list with V/q data for each cycle.
     elif ext == ".mpt":
+        from ecdh.readers import BioLogic as BL
         df = BL.read_mpt(filepath)
     elif ext == ".txt":
+        from ecdh.readers import BatSmall as BS
         df = BS.read_txt(filepath)
     else:
         LOG.error(f"File format not supported: {ext}")

@@ -60,7 +60,11 @@ def read_mpt(filepath):
     LOG.debug("Dataframe column names: {}".format(big_df.columns))
 
     # Start filling dataframe
-    df = big_df[['mode', 'time/s', 'Ewe/V', '<I>/mA', 'cycle number', 'ox/red']]
+    if 'I/mA' in big_df.columns:
+        current_header = 'I/mA'
+    elif '<I>/mA' in big_df.columns:
+        current_header = '<I>/mA'
+    df = big_df[['mode', 'time/s', 'Ewe/V', current_header, 'cycle number', 'ox/red']]
 
     # If it's galvanostatic we want the capacity
     mode = df['mode'].value_counts() #Find occurences of modes
