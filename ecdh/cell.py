@@ -250,6 +250,39 @@ class Cell:
                 self.charges = self.charges[self.start_cut:]
 
 
+    def reduce_data(self):
+        """
+        Takes the data and deletes points not matching the requirement.
+        Useful if you measured with too high sampling rate and have gigantic datafiles
+        Example: you sampled for every 1mV change, and every second, then with dV = 0.010 and dt = 10, all points that has less than a difference of 10mV AND less than 10s will be deleted.
+        """
+        if not self.df:
+            LOG.error("cell.reduce_data() function called before the cell object has GC or CV data.")
+        else:
+            LOG.debug("cell.reduce_data() is running.")
+            dt = 10 #10 s
+            dV = 0.01 # 10mV
+            dI = 0.01 #0.01 mA, 10uA
+            #'time/s','Ewe/V', '<I>/mA'
+            last_t = self.df['t'].iloc[0]
+            last_V = self.df['V'].iloc[0]
+            kill_index = []
+
+            for i,row in self.df.iloc[1:].iterrows():
+                curr_t = row.iloc[0]
+                curr_V = row.iloc[1]
+
+                if abs(last_t - curr_t) < dt and abs(last_V - curr_V) < dV:
+                    kill_index.append(i)
+                else:
+                    last_t = curr_t
+                    last_V = curr_V
+
+            print(kill_index)
+
+            #print(self.df.drop(kill_index))
+            
+
     def plot(self):
         if self.plotobj.vcplot:
             if self.df.experiment_mode == 2:

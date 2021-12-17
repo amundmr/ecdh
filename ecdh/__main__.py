@@ -52,6 +52,7 @@ def run():
         #cell.edit_GC()
         #cell.treat_data(settings)
         cell.plot()
+        cell.reduce_data()
         #cells.append(cell)
 
 
