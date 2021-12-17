@@ -43,6 +43,9 @@ def read(filepath):
     elif ext == ".txt":
         from ecdh.readers import BatSmall as BS
         df = BS.read_txt(filepath)
+    elif ext == ".ecdh":
+        from ecdh.readers import Processed as PC
+        df = PC.read_ecdh(filepath)
     else:
         LOG.error(f"File format not supported: {ext}")
         LOG.error("Exiting..")

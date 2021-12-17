@@ -30,6 +30,7 @@ def run():
     toml_str = open(path, "r").read()
     config = toml.loads(toml_str)
     settings = config["settings"]
+    datatreatment = config["datatreatment"]
 
     # Check that files are found
     files = check_files(config["files"])
@@ -51,8 +52,9 @@ def run():
         cell.get_data()
         #cell.edit_GC()
         #cell.treat_data(settings)
+        if datatreatment['reduce_data']:
+            cell.reduce_data(datatreatment)
         cell.plot()
-        cell.reduce_data()
         #cells.append(cell)
 
 

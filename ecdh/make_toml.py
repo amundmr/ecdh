@@ -4,7 +4,7 @@ from ecdh.log import LOG
 
 def make_toml(folder):
     files = []
-    extlist = ["mpt", "csv", "txt", "xlsx"]
+    extlist = ["mpt", "csv", "txt", "xlsx", "ecdh"]
 
 
     #Loop over all elements in current directory
@@ -37,6 +37,12 @@ suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
 all_in_one = true
+
+[datatreatment]
+reduce_data = false             # Reduces large files by changing potential resolution to 10mV and time resolution to 10s (new file is saved at same location as input file)
+dt = 10                         # Maximum voltage which goes by unrecorded
+dV = 0.01                       # Maximum time which goes by unrecorded
+smooth_data = false             # removes outliers, new file saved at same location as input file
 """
 
     with open("ecdh.toml", "w") as f:
