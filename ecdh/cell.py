@@ -305,6 +305,24 @@ class Cell:
         self.df.to_csv(path_or_buf=filename+"_reduced.ecdh")
 
             
+    def smooth_data(self, datatreatment):
+        """
+        Takes the data and removes outliers
+        Useful if you have a couple of shorts
+        
+        """
+        LOG.info(f"Removing outliers on {self.name}.")
+        import pandas as pd
+        window = int(len(self.df) / 10000)
+        smoothing_df = pd.DataFrame()
+        smoothing_df['median']= self.df['Ewe/V'].rolling(window).median()
+        smoothing_df['std'] = self.df['Ewe/V'].rolling(window).std()
+
+        expmode = self.df.experiment_mode
+        #filter setup
+        self.df = self.df[(self.df['Ewe/V'] <= smoothing_df['median']+3*smoothing_df['std']) & (self.df['Ewe/V'] >= smoothing_df['median']-3*smoothing_df['std'])].ewm(alpha = 0.9).mean()
+        self.df.experiment_mode = expmode
+
 
     def plot(self):
         if self.plotobj.vcplot:

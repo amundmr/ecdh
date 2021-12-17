@@ -54,6 +54,10 @@ def run():
         #cell.treat_data(settings)
         if datatreatment['reduce_data']:
             cell.reduce_data(datatreatment)
+
+        if datatreatment['smooth_data']:
+            cell.smooth_data(datatreatment)
+            
         cell.plot()
         #cells.append(cell)
 
