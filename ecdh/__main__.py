@@ -48,7 +48,7 @@ def run():
         except:
             am_mass = None
 
-        cell = Cell(f[0], am_mass, plot=plot)
+        cell = Cell(f[0], am_mass, plot=plot, specific_cycles = settings['specific_cycles'])
         cell.get_data()
         #cell.edit_GC()
         #cell.treat_data(settings)

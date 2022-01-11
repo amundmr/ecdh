@@ -308,7 +308,7 @@ class Cell:
     def smooth_data(self, datatreatment):
         """
         Takes the data and removes outliers
-        Useful if you have a couple of shorts
+        Useful if you have a couple of short circuits now and then
         
         """
         LOG.info(f"Removing outliers on {self.name}.")

@@ -102,9 +102,18 @@ def read_txt(filepath):
     big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
     
     #Extract useful columns, change the name of the columns, make all numbers numbers.
-    df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []', 'C [mAh/kg]']]
+    def _which_cap_col(big_df):
+        for col in big_df.columns:
+            if 'C [mAh/kg]' in col:
+                return 'C [mAh/kg]'
+            elif 'C [Ah/kg]' in col:
+                return 'C [Ah/kg]'
+
+    df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []', _which_cap_col(big_df)]]
     del big_df #deletes the dataframe
     gc.collect() #Clean unused memory (which is the dataframe above)
+    if 'C [Ah/kg]' in df.columns:
+        df['C [Ah/kg]'] = df['C [Ah/kg]'].apply(lambda x: abs(x*1000)) #Convert from Ah/kg to mAh/kg
     df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] #Renaming the columns. columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
     df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
