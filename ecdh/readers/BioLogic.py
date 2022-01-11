@@ -77,14 +77,18 @@ def read_mpt(filepath):
     if mode == 1:
         df = df.join(big_df['Capacity/mA.h'])
         df.rename(columns={'Capacity/mA.h': 'capacity/mAhg'}, inplace=True)
-        df['capacity/mAhg'] = pd.to_numeric(df['capacity/mAhg'].str.replace(',','.'))
+        if df.dtypes['capacity/mAhg'] == str: #the str.replace only works and is only needed if it is a string
+            df['capacity/mAhg'] = pd.to_numeric(df['capacity/mAhg'].str.replace(',','.'))
     del big_df #deletes the dataframe
     gc.collect() #Clean unused memory (which is the dataframe above)
     # Replace , by . and make numeric from strings. Mode is already interpreted as int.
-    df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
-    df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
-    df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
-    df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
+    for col in df.columns:
+        if df.dtypes[col] == str: #the str.replace only works and is only needed if it is a string
+            df[col] = pd.to_numeric(df[col].str.replace(',','.'))
+    #df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
+    #df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
+    #df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
+    #df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
     df.rename(columns={'ox/red': 'charge'}, inplace=True)
     df['charge'].replace({1: True, 0: False}, inplace = True)
 
