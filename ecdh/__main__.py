@@ -26,7 +26,7 @@ def run():
     else:
         LOG.error("Cannot find the .toml configuration file!")
         sys.exit()
-
+    LOG.debug("Reading config file: '{}'".format(path))
     toml_str = open(path, "r").read()
     config = toml.loads(toml_str)
     settings = config["settings"]
@@ -72,6 +72,8 @@ def main():
         make_toml("./")
     elif sys.argv[1] == "run":
         run()
+    else:
+        LOG.critical("Can't interpret CLI parameters.")
 
 if __name__ == "__main__":
     main()
