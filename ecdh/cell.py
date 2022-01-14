@@ -348,15 +348,15 @@ class Cell:
                 self.edit_GC()
             
             import numpy as np
-            def _find_nearest_idx(chg, interval):
+            def _find_charge(chg, interval):
                 start, stop = interval
                 cap , pot = chg
                 pot = np.asarray(pot)
                 idxstart = (np.abs(pot - start)).argmin()
                 idxstop = (np.abs(pot - stop)).argmin()
-                capstart = cap[]
+                capdiff = cap[idxstop] - cap[idxstart]
 
-                return idx
+                return abs(capdiff)
 
             # Format list like: [chg, dchg], chg = [cap in interval 1, cap in interval 2, cap in interval n]
             caps = [[],[]]
@@ -366,30 +366,18 @@ class Cell:
                         chg, dchg = cycle
                         for interval in intervals:
                             #Chg first
-                            startcap = chg[0][_find_nearest_idx(chg[1], interval[0])]
-                            endcap = chg[0][_find_nearest_idx(chg[1], interval[1])]
-                            chgcap = abs(endcap-startcap)
-                            caps[0].append(chgcap)
+                            caps[0].append(_find_charge(chg, interval))
                             #Dchg
-                            startcap = dchg[0][_find_nearest_idx(dchg[1], interval[0])]
-                            endcap = dchg[0][_find_nearest_idx(dchg[1], interval[1])]
-                            dchgcap = abs(endcap-startcap)
-                            caps[1].append(dchgcap)
+                            caps[1].append(_find_charge(dchg, interval))
 
             else:
                 for i,cycle in enumerate(data):
                     chg, dchg = cycle
                     for interval in intervals:
                         #Chg first
-                        startcap = chg[0][_find_nearest_idx(chg[1], interval[0])]
-                        endcap = chg[0][_find_nearest_idx(chg[1], interval[1])]
-                        chgcap = abs(endcap-startcap)
-                        caps[0].append(chgcap)
+                        caps[0].append(_find_charge(chg, interval))
                         #Dchg
-                        startcap = dchg[0][_find_nearest_idx(dchg[1], interval[0])]
-                        endcap = dchg[0][_find_nearest_idx(dchg[1], interval[1])]
-                        dchgcap = abs(endcap-startcap)
-                        caps[1].append(dchgcap)
+                        caps[1].append(_find_charge(dchg, interval))
 
             LOG.success("WOW WE GOT SOME CAPS: {}".format(caps))
 
