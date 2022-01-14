@@ -326,6 +326,75 @@ class Cell:
         self.df.experiment_mode = expmode
 
 
+    def print_capacities(self, datatreatment):
+        """
+        Returns capacity in a potential interval for each cycle.
+        Appends to filename "./capacities.txt"
+        """
+        if not len(datatreatment['print_capacities'])%2 == 0:
+            LOG.critical("You wanted to get the potential-interval capacities, but you inserted an odd number of boundaries. You need two boundaries for each range, eg: [3.5, 4.4, 4.4, 5.0] will be two ranges from 3.5->4.4 and 4.4->5.0. The capacities will not be printed.")
+        else:
+            intervals = []
+            for i,pot in enumerate(datatreatment['print_capacities']):
+                if i%2!=0: #if the index number is odd, we are making a range of it
+                    intervals.append((datatreatment['print_capacities'][i-1], pot))
+            LOG.info("Found intervals for capacity print: {}".format(intervals))
+                    
+            if self.GCdata:
+                data = self.GCdata
+            elif self.CVdata:
+                data = self.CVdata
+            else:
+                self.edit_GC()
+            
+            import numpy as np
+            def _find_nearest_idx(chg, interval):
+                start, stop = interval
+                cap , pot = chg
+                pot = np.asarray(pot)
+                idxstart = (np.abs(pot - start)).argmin()
+                idxstop = (np.abs(pot - stop)).argmin()
+                capstart = cap[]
+
+                return idx
+
+            # Format list like: [chg, dchg], chg = [cap in interval 1, cap in interval 2, cap in interval n]
+            caps = [[],[]]
+            if self.specific_cycles:
+                for i, cycle in enumerate(data):
+                    if i in self.specific_cycles:
+                        chg, dchg = cycle
+                        for interval in intervals:
+                            #Chg first
+                            startcap = chg[0][_find_nearest_idx(chg[1], interval[0])]
+                            endcap = chg[0][_find_nearest_idx(chg[1], interval[1])]
+                            chgcap = abs(endcap-startcap)
+                            caps[0].append(chgcap)
+                            #Dchg
+                            startcap = dchg[0][_find_nearest_idx(dchg[1], interval[0])]
+                            endcap = dchg[0][_find_nearest_idx(dchg[1], interval[1])]
+                            dchgcap = abs(endcap-startcap)
+                            caps[1].append(dchgcap)
+
+            else:
+                for i,cycle in enumerate(data):
+                    chg, dchg = cycle
+                    for interval in intervals:
+                        #Chg first
+                        startcap = chg[0][_find_nearest_idx(chg[1], interval[0])]
+                        endcap = chg[0][_find_nearest_idx(chg[1], interval[1])]
+                        chgcap = abs(endcap-startcap)
+                        caps[0].append(chgcap)
+                        #Dchg
+                        startcap = dchg[0][_find_nearest_idx(dchg[1], interval[0])]
+                        endcap = dchg[0][_find_nearest_idx(dchg[1], interval[1])]
+                        dchgcap = abs(endcap-startcap)
+                        caps[1].append(dchgcap)
+
+            LOG.success("WOW WE GOT SOME CAPS: {}".format(caps))
+
+
+
     def plot(self):
         if self.plotobj.vcplot:
             if self.df.experiment_mode == 2:

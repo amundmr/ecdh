@@ -52,14 +52,19 @@ def run():
         cell.get_data()
         #cell.edit_GC()
         #cell.treat_data(settings)
+        cell.plot()
+        #cells.append(cell)
+        
         if datatreatment['reduce_data']:
             cell.reduce_data(datatreatment)
 
         if datatreatment['smooth_data']:
             cell.smooth_data(datatreatment)
+        
+        if datatreatment['print_capacities']:
+            cell.print_capacities(datatreatment)
             
-        cell.plot()
-        #cells.append(cell)
+        
 
 
 
