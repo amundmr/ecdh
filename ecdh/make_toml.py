@@ -43,6 +43,7 @@ reduce_data = false             # Reduces large files by changing potential reso
 dt = 10                         # Maximum voltage which goes by unrecorded
 dV = 0.01                       # Maximum time which goes by unrecorded
 smooth_data = false             # removes outliers, new file saved at same location as input file
+print_capacities = false        # Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]
 """
 
     with open("ecdh.toml", "w") as f:

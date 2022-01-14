@@ -326,6 +326,29 @@ class Cell:
         self.df.experiment_mode = expmode
 
 
+    def print_capacities(self, datatreatment):
+        """
+        Returns capacity in a potential interval for each cycle.
+        Appends to filename "./capacities.txt"
+        """
+        if not len(datatreatment['print_capacities'])%2 == 0:
+            LOG.critical("You wanted to get the potential-interval capacities, but you inserted an odd number of boundaries. You need two boundaries for each range, eg: [3.5, 4.4, 4.4, 5.0] will be two ranges from 3.5->4.4 and 4.4->5.0. The capacities will not be printed.")
+        else:
+            intervals = []
+            for i,pot in enumerate(datatreatment['print_capacities']):
+                if i%2!=0: #if the index number is odd, we are making a range of it
+                    intervals.append((datatreatment['print_capacities'][i-1], pot))
+            LOG.info("Found intervals for capacity print: {}".format(intervals))
+                    
+            if self.GCdata:
+                data = self.GCdata
+            elif self.CVdata:
+                data = self.CVdata
+            else:
+                LOG.error("Cannot find any data to exctract the capacity in the potential windows from.. (for dev: please make sure edit_GC or edit_CV is ran)")
+            for cycle in data:
+                
+
     def plot(self):
         if self.plotobj.vcplot:
             if self.df.experiment_mode == 2:

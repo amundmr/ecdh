@@ -57,6 +57,9 @@ def run():
 
         if datatreatment['smooth_data']:
             cell.smooth_data(datatreatment)
+        
+        if datatreatment['print_capacities']:
+            cell.print_capacities(datatreatment)
             
         cell.plot()
         #cells.append(cell)
