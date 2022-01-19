@@ -102,7 +102,7 @@ If I now enter the *ecdh.toml* file and set *dqdvplot = true*, *qcplot = false* 
 
 ## Flowchart
 
-![](doc/ecdh_flowchart.svg)
+![](doc/UML_diagram.svg)
 
 ## SubModules
 
