@@ -27,7 +27,10 @@ class Cell:
             self.am_mass = float(am_mass)
         except:
             self.am_mass = None
-        self.color = plot.get_color()
+        if plot:
+            self.color = plot.get_color()
+        else:
+            self.color = "black"
         self.name = os.path.basename(filename)
         self.plotobj = plot
         self.axes = []
@@ -384,6 +387,11 @@ class Cell:
 
 
     def plot(self):
+        if not self.plotobj:
+            LOG.error("No plot object supplied to the cell, but cell.plot was still called! Exiting..")
+            import sys
+            sys.exit()
+
         if self.plotobj.vcplot:
             if self.df.experiment_mode == 2:
                 self.edit_CV()
