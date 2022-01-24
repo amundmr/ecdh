@@ -329,7 +329,7 @@ class Cell:
         self.df.experiment_mode = expmode
 
 
-    def print_capacities(self, datatreatment):
+    def get_capacities(self, datatreatment):
         """
         Returns capacity in a potential interval for each cycle.
         Appends to filename "./capacities.txt"
@@ -362,27 +362,28 @@ class Cell:
                 return abs(capdiff)
 
             # Format list like: [chg, dchg], chg = [cap in interval 1, cap in interval 2, cap in interval n]
-            caps = [[],[]]
+            caps = {self.name : {}}
+            for interval in intervals:
+                caps[self.name][str(interval)] = { "charge" : [],
+                                        "discharge": []}
+
             if self.specific_cycles:
                 for i, cycle in enumerate(data):
                     if i in self.specific_cycles:
                         chg, dchg = cycle
                         for interval in intervals:
-                            #Chg first
-                            caps[0].append(_find_charge(chg, interval))
-                            #Dchg
-                            caps[1].append(_find_charge(dchg, interval))
+                            caps[self.name][str(interval)]["charge"].append(_find_charge(chg, interval))
+                            caps[self.name][str(interval)]["discharge"].append(_find_charge(dchg, interval))
 
             else:
                 for i,cycle in enumerate(data):
                     chg, dchg = cycle
                     for interval in intervals:
-                        #Chg first
-                        caps[0].append(_find_charge(chg, interval))
-                        #Dchg
-                        caps[1].append(_find_charge(dchg, interval))
+                        caps[self.name][str(interval)]["charge"].append(_find_charge(chg, interval))
+                        caps[self.name][str(interval)]["discharge"].append(_find_charge(dchg, interval))
 
-            LOG.success("WOW WE GOT SOME CAPS: {}".format(caps))
+            
+            return caps
 
 
 

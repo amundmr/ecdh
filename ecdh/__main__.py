@@ -62,7 +62,29 @@ def run():
             cell.smooth_data(datatreatment)
         
         if datatreatment['print_capacities']:
-            cell.print_capacities(datatreatment)
+
+            if not os.path.isfile("capacity_intervals.json"):
+                with open("capacity_intervals.json", "w") as f:
+                    f.close()
+
+            import json
+ 
+            new_json = cell.get_capacities(datatreatment)
+
+            with open("capacity_intervals.json",'r+') as file:
+                # First we load existing data into a dict.
+                try:
+                    file_data = json.load(file)
+                except:
+                    file_data = []
+                # Join new_data with file_data inside emp_details
+                file_data.append(new_json)
+                # Sets file's current position at offset.
+                file.seek(0)
+                # convert back to json.
+                json.dump(file_data, file, indent = 4)
+            
+            
             
         
 
