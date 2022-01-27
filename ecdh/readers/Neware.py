@@ -5,7 +5,12 @@ import numpy as np
 import gc
 from ecdh.log import LOG
 LOG.error("MATS IS WORKING ON MOVING OVER THE *** TO PD DATAFRAMES")
+
 def read_csv(filepath):
+    print("This is under development.")
+    LOG.error("Hi.")
+
+def read_csv_old(filepath):
     
     """
     Reads a .csv file from Neware general report
@@ -123,46 +128,3 @@ def read_csv(filepath):
 
             
     return charges, discharges"""
-
-
-def read_xlsx(filename):
-    import openpyxl as px
-    import numpy as np
-
-    # Open workbook
-    wb = px.load_workbook(filename)
-    # Get sheet
-    sheet = wb[wb.sheetnames[3]]
-    max_row = sheet.max_row-1 #-1 removes the first row with text
-    # Spawn arrays for all raw data of columns
-    status = []
-    voltage = np.zeros(max_row)
-    capacity = np.zeros(max_row)
-
-    # Insert all data in arrays
-    for i in range(max_row):
-        voltage[i] = sheet.cell(row=i+2, column = 7).value
-        capacity[i] = sheet.cell(row=i+2, column = 8).value
-        status.append(sheet.cell(row=i+2, column=2).value)
-
-    # Find where a charge and a discharge starts. Since charging occurs first, charges will be at even indexes of indx, eg: 0, 2, 4..
-    indx =[] # Just a list to store where in the raw data a charge (even index) or discharge (odd index)
-    for i in range(1,len(status)):
-        if status[i] == "CC Chg" and status[i-1] != "CC Chg": # If status just changed to CC Chg, this is a charge start
-            indx.append(i)
-        elif status[i] == "CC DChg" and status[i-1] != "CC DChg": # If status just changed to CC DChg, this is a discharge start
-            indx.append(i)
-    indx.append(max_row) #Inserting last elem means we catch the end cycle!
-
-    # Making lists for the cycles
-    charges = []
-    discharges = []
-
-    # Inserting slices of raw data (corresponding to 1 cycle) into the list of charges
-    for i in range(len(indx)-1): #-1 is to not run out of indexes when i+1
-        if (i % 2) == 0: #index is even -> charge cycle
-            charges.append((voltage[indx[i]:indx[i+1]], capacity[indx[i]:indx[i+1]])) #Inserting tuple of two arrays sliced to be one cycle of voltages and capacities.
-        else: #Not even? Then its a discharge cycle
-            discharges.append((voltage[indx[i]:indx[i+1]], capacity[indx[i]:indx[i+1]]))
-
-    return charges, discharges
