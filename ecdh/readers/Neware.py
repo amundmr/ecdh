@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np      
 import gc
 from ecdh.log import LOG
-LOG.error("NEWARE READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
+LOG.error("MATS IS WORKING ON MOVING OVER THE *** TO PD DATAFRAMES")
 def read_csv(filepath):
     
     """
