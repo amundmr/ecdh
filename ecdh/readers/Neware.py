@@ -7,9 +7,10 @@ import gc
 from ecdh.log import LOG
 LOG.error("MATS IS WORKING ON HANDLING THE DATA FROM THE CSV-FILE TO BE CORRECTLY FORMATED PANDAS.DATAFRAMES")
 
-skole_fil = "C:/Users/matsarod/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all/MR_B_test_2.csv"
+#skole_fil = "C:/Users/matsarod/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all/MR_B_test_2.csv"
 hjemme_fil = "C:/Users/mats-/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all/MR_B_test_2.csv"
-
+fil = hjemme_fil
+"""
 def find_path():
     # Function to sort out if home PC or school PC. 
     # This have improvement potential. 
@@ -22,7 +23,7 @@ def find_path():
     #Check if the filepath exists: 
     print("Filepath exists =",os.path.isfile(fil))
     print("")
-
+"""
 
 def read_csv(filepath):
     LOG.error("This is under development.")
@@ -232,8 +233,8 @@ def read_csv_old(filepath):
     print(df.head)
 
 """
-
-    """import numpy as np
+"""
+    import numpy as np
     #Open file
     with open(filepath, 'r', encoding = "ISO-8859-1") as f:
         #Read the first 2 lines which doesnt contain any data
@@ -311,4 +312,5 @@ def read_csv_old(filepath):
         discharges.append((voltages, capacities))
 
             
-    return charges, discharges"""
+    return charges, discharges
+"""
