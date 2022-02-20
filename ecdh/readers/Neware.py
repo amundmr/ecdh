@@ -1,34 +1,26 @@
 # -*- coding: utf-8 -*-
 """Data-readers for Neware"""
-import os.path
+# Note: If the csv-files are edited in Excel they get " added to the start of the first column. This format change confuses program.
 import pandas as pd
-import numpy as np      
-import gc
-from ecdh.log import LOG
-LOG.error("MATS IS WORKING ON HANDLING THE DATA FROM THE CSV-FILE TO BE CORRECTLY FORMATED PANDAS.DATAFRAMES")
 
-#skole_fil = "C:/Users/matsarod/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all/MR_B_test_2.csv"
-hjemme_fil = "C:/Users/mats-/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all/MR_B_test_2.csv"
-fil = hjemme_fil
-"""
-def find_path():
-    # Function to sort out if home PC or school PC. 
-    # This have improvement potential. 
-    # This takes some time to check, but nice to have since I'm on two computers.
-    if os.path.isfile(skole_fil) == False:
-        fil = hjemme_fil
-    else: 
-        fil = skole_fil
+# Specified in order to see the all relevant columns of the Dataframe
+pd.set_option('display.max_rows', 10)
+pd.set_option('display.max_columns', 10)
+pd.set_option('display.width', 1000)
 
-    #Check if the filepath exists: 
-    print("Filepath exists =",os.path.isfile(fil))
-    print("")
-"""
+# Here we define the files we want to use. 
+# This should be automated as rest of the code. 
+file = "/MR_B_076.csv"         # Real sample. 280 000 lines 
 
-def read_csv(filepath):
-    LOG.error("This is under development.")
+# Filepaths
+fp_home = "C:/Users/mats-/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all"+file
+#fp_school = "C:/Users/matsarod/OneDrive/Master/Master_oppgave/Batteri_data/MR_T_all" + file
+
+fil = fp_home
+filepath = fil
 
 # Here we introduce the lists that is going to form the dataframe later. 
+lead = []               # Indicates Normal/Extra/Main line
 mode = []               # mode
 time = []               # time/s
 V = []                  # Ewe/V
@@ -37,7 +29,7 @@ cyc = []                # cycle number
 chrg = []               # charge
 
 # List of the names of the columns we need. These names does not represent what values the colummn will have. This is only valid for "Main" 
-col_list = ['"Cycle ID', "Cap_DChg(mAh)", "Specific Capacity-Chg(mAh/g)", "Specific Capacity-Dchg(mAh/g)"]
+col_list = ['Cycle ID','Cap_DChg(mAh)','Specific Capacity-Chg(mAh/g)','Specific Capacity-Dchg(mAh/g)']
 
 # This reads the csv file with some extra options
 data = pd.read_csv( fil,
@@ -47,7 +39,7 @@ data = pd.read_csv( fil,
                    sep=",\t",                   # Removes the odd \t delimiters. Critical.
                    engine='python',             # Don't remeber why I needed this one. Something with calc time?
                    skipinitialspace=True,       # Don't remeber why I needed this one. Something with calc time?
-                   #nrows = 5                   # This will chose how many lines you take out from the csv file. Convenient when handling large files..
+                   #nrows = 60                   # This will chose how many lines you take out from the csv file. Convenient when handling massive files..
                    )                  
 
 # Defining temp list to store untreated data from csv file. 
@@ -57,74 +49,126 @@ scd = data[col_list[3]]          # Colunm marked as "Specific Capacity Discharge
 num = data[col_list[0]]          # Colunm marked as "Cycle ID" in csv file
 
 def time_secs(time_s):
-    #Takes neware string of time and returns float in seconds. 
-    #Made by AMR. 
+    #Takes neware string of time and returns float in seconds
     time_s = time_s
     numb = time_s.split(":")
-    #day = float(numb[-4])
-    hours = float(numb[-3])
-    mins = float(numb[-2])
-    secs = float(numb[-1])
-    time = hours*3600 + mins*60 + secs #+ day*86400 
+    try:
+        day = float(numb[-4])
+        hours = float(numb[-3])
+        mins = float(numb[-2])
+        secs = float(numb[-1])
+        time = hours*3600 + mins*60 + secs + day*86400
+    except IndexError:
+        secs = float(numb[-1])
+        time = secs
     return time
+
+def cdr(a4):
+    # Function to separate charge/discharge/rest
+    # Input (current). Output: Mode, Charging
+    ep = 10e-12
+    if a4 >= 0+ep:
+        a1 = 1
+        a6 = 'False'
+    elif a4 <= 0-ep:
+        a1 = 1
+        a6 = 'True'
+    elif a4 == 0:
+        a1 = 3
+        a6 = 'False'
+        
+    return a1,a6
 
 def sorting():
     # This function takes out the values from the csv file, handles them, and puts them in the correct lists. 
-    # Need to find a way without for-loops with if-statements
-    a1,a2,a3,a4,a5,a6 = [3,0,3,0,0,"FALSE_init"]                                         # Initail values
+    # Initial values
+    a4,a5 = float(scd[3]), int(num[2])
+    a1, a2,a3,a6 = cdr(a4)[0], float(time_secs(cdc[4])), float(scc[4]), cdr(a4)[1] 
+    
+    # The first rows are not included as they are headers. We still need some of them for initail conditons so we can't skip them in the reader.
     for k in range(4,len(num)):
-        if num[k] == '"':               # Indicates "Extra" --> Gives
-            a1 = num[k]                 # Remeber to check if str
-            if a1 == 'CC_Chg':
-                a1 = 1
-                a6 = 'True'
-            elif a1 == 'CC_DChg':
-                a1 = 2
-                a6 = 'False'
-            elif a1 == 'Rest':
-                a1 = 3
-                a6 = 'False'
-            else: 
-                a1 = 4
-                a6 = 'Error'
-                
-        elif num[k] == '",':            # Indicates "Normal"
-            a2 = time_secs(cdc[k])
-            a2 = float (a2)    
-            a3 = float(scc[k])         
-            a4 = float(scd[k])
-            
-        elif num[k] == '"1':            # Indicates "Main"
-            a5 = int(num[k][1][0])      # 
         
-        # Here we append the values to correct lists. 
+        # Adjusting the value of the first cycle after rest
+        try:
+            q = mode.index(1)+5
+            if int(k) == int(q):
+                a5 = a5 +1
+        except ValueError:
+            a5 = 0  
+        
+        # If we have a cycle number, we make it an integer.
+        try:
+            a5 = int(num[k])
+        # If we the csv column element is ',' it indicates 'Normal' line.
+        except ValueError:
+            if num[k] == ',':                       # Indicates "Normal"
+                b2 = time_secs(cdc[k])
+                a2 = float(b2)    
+                a3 = float(scc[k])         
+                a4 = float(scd[k])
+                a1 = cdr(a4)[0]
+                a6 = cdr(a4)[1]
+        
+        # Here we append the  values to its corresponding list. 
         mode.append(a1) 
         time.append(a2)
         V.append(a3)
-        I.append(a4) 
+        I.append(a4)        
         cyc.append(a5) 
-        chrg.append(a6)
-        
-    sl = [mode,time,V,I,cyc,chrg] 
+        chrg.append(a6) 
+
+    sl = [mode,time,V,I,cyc,chrg]
     return sl
 
-sf = sorting()                                                                  # Calling the sorting function
-sl_n = ["mode", "time/s", "Ewe/V", "<I>/A", "cycle number", "charge"]           # The name of the elements in the superlist
+def frame(sl):
+    # Making a dataframe from lists. Not general, only made for this purpose. 
+    # The name of the elements in the superlist
+    sl_n = ["mode", "time/s", "Ewe/V", "<I>/A", "cycle number", "charge"]           
+    df_sl = pd.DataFrame(list(zip(sl[0],sl[1],sl[2],sl[3],sl[4],sl[5])), columns = sl_n)
+    return df_sl
 
-# Creating the format of the dataframe we want to have.
-df_sl = pd.DataFrame(list(zip(sf[0],sf[1],sf[2],sf[3],sf[4],sf[5])), columns = sl_n)        # Uses zip to flip x/y axis on dataframe
-print(df_sl)                                                                               # Printing the final DataFrame with correctly sorted values. Hopefuly
+# Calling the sorting function lists
+sfl = sorting()         # Sorted lists
 
+# Calling the dataframe function to make a dataframe out of the sorting function lists
+sdf = frame(sfl)        # Sorted dataframe
 
+df_sl0 = sdf.iloc[0:8]
+df_sl1 = sdf.iloc[12:18]
+df_sl2 = sdf.iloc[6534:6541]
+    
+print(df_sl0)
+print(".....................................................")
+print(df_sl1)
+print(".....................................................")
+print(df_sl2)
 
-# Output as of 14.02.2022 12:39
+#Output as of 20.02.2022
 """
    mode  time/s   Ewe/V  <I>/A  cycle number charge
-0     3     0.0  2.6742    0.0             0  FALSE
-1     3    10.0  2.6739    0.0             0  FALSE
-2     3    20.0  2.6739    0.0             0  FALSE
-3     3    30.0  2.6736    0.0             0  FALSE
-4     3    40.0  2.6736    0.0             0  FALSE
-5     3    50.0  2.6736    0.0             0  FALSE
-6     3    60.0  2.6729    0.0             0  FALSE
+0     3     0.0  1.0456    0.0             0  False
+1     3    10.0  1.0456    0.0             0  False
+2     3    20.0  1.0456    0.0             0  False
+3     3    30.0  1.0456    0.0             0  False
+4     3    40.0  1.0456    0.0             0  False
+5     3    50.0  1.0456    0.0             0  False
+6     3     0.0  1.0456    0.0             0  False
+7     3    10.0  1.0456    0.0             0  False
+.....................................................
+    mode  time/s   Ewe/V   <I>/A  cycle number charge
+12     3     0.0  1.0456  0.0000             0  False
+13     3     9.0  1.0456  0.0000             0  False
+14     3     9.0  1.0456  0.0000             0  False
+15     1     0.0  1.0212 -0.3499             0   True
+16     1     4.0  1.0097 -0.3499             1   True
+17     1     8.0  0.9988 -0.3499             1   True
+.....................................................
+      mode  time/s   Ewe/V   <I>/A  cycle number charge
+6534     1    50.0  0.0499 -0.3499             1   True
+6535     1    50.0  0.0499 -0.3499             2   True
+6536     1    50.0  0.0499 -0.3499             2   True
+6537     1     0.0  0.0644  0.3500             2  False
+6538     1     9.0  0.0747  0.3500             2  False
+6539     1    10.0  0.0756  0.3500             2  False
+6540     1    20.0  0.0802  0.3500             2  False
 """
