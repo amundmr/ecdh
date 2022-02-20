@@ -11,7 +11,6 @@ def csv_to_df(filepath):
     pd.set_option('display.width', 1000)
     
     # Here we introduce the lists that is going to form the dataframe later. 
-    lead = []               # Indicates Normal/Extra/Main line
     mode = []               # mode
     time = []               # time/s
     V = []                  # Ewe/V
