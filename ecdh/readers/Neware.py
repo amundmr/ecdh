@@ -116,9 +116,10 @@ def read_csv(filepath):
         ind = []
         for i in range(2,len(time)):
             if time[i] == time[i-1]:
-                ind.append(i+1)
-                ind.append(i)
                 ind.append(i-1)
+                ind.append(i)
+                #ind.append(i+1)
+                #ind.append(i+2)
         
         for index in sorted(ind, reverse=True):
             del mode[index]
@@ -168,17 +169,20 @@ def read_csv(filepath):
     
 
     # This function removes duplicated rows
-    sfl2 = dup(sfl)
+    #sfl_dup = dup(sfl)
+    
     
     # This function adjusts error with numbering the first cycle
-    sfl3 = fc(sfl2)
+    sfl_adj = fc(sfl)
     
     # This function adds the prevoius cycle time to the next cycle. Neware only measures time per cycle, and resets time between each cycle.
-    sfl4 = time_it(sfl3)
+    sfl_it = time_it(sfl_adj)
     #return sfl4
  
     # Calling the dataframe function to make a dataframe out of the sorting function lists
-    df = frame(sfl4)        # Sorted dataframe
+    df = frame(sfl_it)        # Sorted dataframe
+    
+    df.drop_duplicates(subset ="time/s", keep = False, inplace = True)
     
     df.experiment_mode = 1
     df.name = os.path.basename(filepath)
