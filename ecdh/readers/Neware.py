@@ -99,13 +99,13 @@ def read_csv(filepath):
                     a1 = cdr(a4)[0]
                     a6 = cdr(a4)[1]
             
-            # Here we append the  values to its corresponding list. 
-            mode.append(a1) 
-            time.append(a2)
-            V.append(a3)
-            I.append(a4)        
-            cyc.append(a5) 
-            chrg.append(a6) 
+                    # Here we append the  values to its corresponding list. 
+                    mode.append(a1) 
+                    time.append(a2)
+                    V.append(a3)
+                    I.append(a4)        
+                    cyc.append(a5) 
+                    chrg.append(a6) 
                     
         sl = [mode,time,V,I,cyc,chrg]
         return sl
