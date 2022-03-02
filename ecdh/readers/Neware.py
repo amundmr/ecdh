@@ -116,6 +116,7 @@ def read_csv(filepath):
         ind = []
         for i in range(2,len(time)):
             if time[i] == time[i-1]:
+                ind.append(i+1)
                 ind.append(i)
                 ind.append(i-1)
         
