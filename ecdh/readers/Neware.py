@@ -43,7 +43,6 @@ def read_csv(filepath):
     
     def time_secs(time_s):
         #Takes neware string of time and returns float in seconds
-        time_s = time_s
         numb = time_s.split(":")
         try:
             #day = float(numb[-4])
@@ -54,6 +53,7 @@ def read_csv(filepath):
         except IndexError:
             secs = float(numb[-1])
             time = secs
+
         return time
     
     def cdr(a4):
@@ -152,9 +152,15 @@ def read_csv(filepath):
     def time_it(sl):
         # Function add the time of the cycles as they iterate. 
         # Standard of Neware is to count the accurate time per cycle, and resets it between each cycle. 
-        ti = [i for i, n in enumerate(time) if n == 0][1]
-        for i in range(ti,len(time)):
-            time[i] = time[i]+time[i-1]
+
+        prev_time = 0
+        for i,t in enumerate(time[1:], start = 1):
+            if t == 0 and time[i-1] > 0:
+                prev_time = time[i-1]
+                time[i] += prev_time
+            else:
+                time[i] += prev_time
+        
         return sl
     
     def frame(sl):
