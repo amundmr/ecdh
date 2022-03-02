@@ -101,22 +101,37 @@ class Cell:
                 #Split into charge and discharge data
                 chgdat = subframe[subframe['charge'] == True].copy(deep=True)
                 dchgdat = subframe[subframe['charge'] == False].copy(deep=True)
+                #print(subframe.head)
 
-                if self.am_mass:
+
+
+                if self.am_mass or 'capacity/mAhg' not in self.df.columns:
+                    if not self.am_mass:
+                        self.am_mass = 1
                     #The inserted Active material mass might differ from the one the instrument software calculated. Thus we make our own capacity calculations.
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric
                     #Placed inside try/except because sometimes the lenght of chgdat["<I>/mA"] or dch is 0 (when the cycle has started but the second redox mode hasnt started), then cumtrapz will fail.
                     try:
-                        chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0) /self.am_mass
-                    except:
-                        chgdat.loc[:,'capacity/mAhg'] = 0
+                        chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0) / self.am_mass
+
+
+                    except Exception as e:
+                        LOG.debug(f"something went wrong with the scipy.integrate.cumtrapz in cell.py under edit_GC: {e}")
+                        if not chgdat.empty:
+                            chgdat.loc[:,'capacity/mAhg'] = 0
+                        else:
+                            chgdat['capacity/mAhg'] = []
+
+
                     try:
-                        dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
+                        dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
                     except:
-                        dchgdat.loc[:,'capacity/mAhg'] = 0
-                    
-                    
+                        if not dchgdat.empty:
+                            dchgdat.loc[:,'capacity/mAhg'] = 0
+                        else:
+                            dchgdat['capacity/mAhg'] = []
+
 
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))

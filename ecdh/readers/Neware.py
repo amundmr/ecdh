@@ -1,168 +1,196 @@
 # -*- coding: utf-8 -*-
 """Data-readers for Neware"""
+# Note: If the csv-files are edited in Excel they get " added to the start of the first column. This format change confuses program.
 import pandas as pd
-import numpy as np      
-import gc
-from ecdh.log import LOG
-LOG.error("NEWARE READER HAS NOT BEEN MOVED OVER TO PD DATAFRAMES")
+import os
+
 def read_csv(filepath):
+
+    # Specified in order to see the all relevant columns of the Dataframe
+    pd.set_option('display.max_rows', 40)
+    pd.set_option('display.max_columns', 10)
+    pd.set_option('display.width', 1000)
     
-    """
-    Reads a .csv file from Neware general report
+    # Here we introduce the lists that is going to form the dataframe later. 
+    mode = []               # mode
+    time = []               # time/s
+    V = []                  # Ewe/V
+    I = []                  # <I>/A
+    cyc = []                # cycle number
+    chrg = []               # charge
     
-    .csv format:
+    # List of the names of the columns we need. These names does not represent what values the colummn will have. This is only valid for "Main" 
+    col_list = ['Cycle ID','Cap_DChg(mAh)','Specific Capacity-Chg(mAh/g)','Specific Capacity-Dchg(mAh/g)']
     
-    """
-    LOG.debug(f"Reading Neware CSV: '{filepath}'")
-
-    # Open file
-    with open(filepath, 'r') as f:
-        lines = f.readlines()
-
-    # Read all data to pandas dataframe
-    big_df = pd.read_csv(filepath, header = 2, delim_whitespace=True)
-    pd.DataFrame.fillna(big_df, method='ffill', inplace = True)
-    #print(big_df["Unnamed: 0"].head)
-    print(big_df.columns)
-    print(big_df.head)
-    #df = big_df.loc[:,('\tTime(h:min:s.ms)', '\tVoltage(V)', '\tCurrent(mA)', 'Unnamed: 0', '\tCapacity Density(mAh/g)')]
-    del big_df #deletes the dataframe
-    gc.collect() #Clean unused memory (which is the dataframe above)
-    #print(df.head)
-    #df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] 
-    #print(df.columns)
-    #print(df['time/s'].iloc[1])
-    def _time_parser(string):
-        """Takes neware string of time and returns float in seconds"""
-        print(string)
-        string = string[2:]
-        nums = string.split(":")
-        hours = float(nums[0])
-        mins = float(nums[1])
-        secs = float(nums[2])
-        return hours*3600 + mins*60 + secs
-
-    df['time/s'] = df['time/s'].apply(lambda x: _time_parser(x)) #Converting from h to s
-    print(df.head)
-    """import numpy as np
-    #Open file
-    with open(filepath, 'r', encoding = "ISO-8859-1") as f:
-        #Read the first 2 lines which doesnt contain any data
-        for i in range(2):
-            f.readline()
-
-        #Find what columns have our data
-        Labels = f.readline().split(",") #Save the line of labels of which we are interested in
-        V_col = 0
-        mAh_col = 0
-        for i,label in enumerate(Labels):
-            if "Voltage(V)" in label:
-                V_col = i
-            if "Capacity(mAh)" in label:
-                mAh_col = i
-
-        #Read rest of data as list of lines
-        data = f.readlines()
+    # This reads the csv file with some extra options
+    data = pd.read_csv( filepath,
+                       usecols = col_list,          # Defines which columns you want to collect data from
+                       encoding = 'ANSI',
+                       #header=0,                   # Needs to be 0 in order to find the headlines
+                       #skiprows = 0,               # Needs to be 0 in order to find the headlines
+                       sep=",\t",                   # Removes the odd \t delimiters. Critical.
+                       engine='python',             # Don't remeber why I needed this one. Something with calc time?
+                       skipinitialspace=True,       # Don't remeber why I needed this one. Something with calc time?
+                       #nrows = 70                  # This will chose how many lines you take out from the csv file. Convenient when handling massive files..
+                       )                  
     
-    #Index where in the file charges and discharges occur
-    Chg_indxs = []
-    DChg_indxs = []
-
-    for i,line in enumerate(data):
-        line_split = line.split(",")
-        if "CC_Chg" in line_split[2]:
-            Chg_indxs.append(i)
-        elif "CC_DChg" in line_split[2]:
-            DChg_indxs.append(i)
-
-    charges = []
-    discharges = []
-    #Returns two arrays with Voltage and Capacity for the selected indexes of data.
-    def slice_data(start, end, data):
-        if end == -1:
-            end = len(data)
-
-        #Spawning data arrays
-        start +=1
-        end -=2
-        voltages = np.zeros(end-start)
-        capacities = np.zeros_like(voltages)
-        for j,line in enumerate(data[start: end]):#Taking the slice of the data arr
-            line = line.split(",")
-            voltages[j] = float(line[V_col])
-            capacities[j] = float(line[mAh_col])
-        return voltages, capacities
-
-    #Create one big list of all indexes in order to know which one is the next
-    all_indxs = Chg_indxs + DChg_indxs
-    all_indxs.sort()
-    # Iterating over all indexes of charge start
-    for i, indx in enumerate(Chg_indxs):
-        i_all = all_indxs.index(indx) #Finding the corresponding item in list of all indexes
-        start = indx   #Setting start of Charge to the charge index
-        try:            #Setting end of charge to discharge index, or last index of data.
-            end = all_indxs[i_all+1]
-        except:
-            end = len(data)-1
-        #Getting the data slice, and putting it in charges list.
-        voltages, capacities = slice_data(start, end, data)
-        #print(voltages)
-        charges.append((voltages, capacities))
+    # Defining temp list to store untreated data from csv file. 
+    cdc = data[col_list[1]]          # Colunm marked as "Capacity DisCharge" in csv file
+    scc = data[col_list[2]]          # Colunm marked as "Specific Capacity Charge" in csv file
+    scd = data[col_list[3]]          # Colunm marked as "Specific Capacity Discharge" in csv file
+    num = data[col_list[0]]          # Colunm marked as "Cycle ID" in csv file
     
-    # Iterating over all indexes of discharge start
-    for i, indx in enumerate(DChg_indxs):
-        i_all = all_indxs.index(indx) #Finding the corresponding item in list of all indexes
-        start = indx   #Setting start of Discharge to the discharge index
-        try:            #Setting end of charge to charge index, or last index of data.
-            end = all_indxs[i_all+1]
-        except:
-            end = len(data)-1
-        #Getting the data slice, and putting it in charges list.
-        voltages, capacities = slice_data(start, end, data)
-        discharges.append((voltages, capacities))
+    
+    def time_secs(time_s):
+        #Takes neware string of time and returns float in seconds
+        numb = time_s.split(":")
+        try:
+            #day = float(numb[-4])
+            hours = float(numb[-3])
+            mins = float(numb[-2])
+            secs = float(numb[-1])
+            time = hours*3600 + mins*60 + secs #+day*86400
+        except IndexError:
+            secs = float(numb[-1])
+            time = secs
 
+        return time
+    
+    def cdr(a4):
+        # Function to separate charge/discharge/rest
+        # Input (current). Output: Mode, Charging
+        ep = 10e-12
+        if a4 >= 0+ep:
+            a1 = 1
+            a6 = True
+        elif a4 <= 0-ep:
+            a1 = 1
+            a6 = False
+        elif a4 == 0:
+            a1 = 3
+            a6 = False
             
-    return charges, discharges"""
+        return a1,a6
+    
+    
+    def sorting():
+        # This function takes out the values from the csv file, handles them, and puts them in the correct lists. 
+        # Initial values
+        a4,a5 = float(scd[3]), int(num[2])-1
+        a1, a2,a3,a6 = cdr(a4)[0], float(time_secs(cdc[4])), float(scc[4]), cdr(a4)[1] 
+        
+        # The first rows are not included as they are headers. We still need some of them for initail conditons so we can't skip them in the reader.
+        for k in range(4,len(num)):
+            
+            # Adjusting the value of the first cycle after rest
+            try:
+                q = mode.index(1)+5
+                a5 = int(num[k])
+                if int(k) == int(q):
+                    a5 = a5 +1
+            
+            # If we the csv column element is ',' it indicates 'Normal' line.
+            except ValueError:
+                if num[k] == ',':                       # Indicates "Normal"
+                    c2 = time_secs(cdc[k])
+                    a2 = float(c2)
+                    a3 = float(scc[k])         
+                    a4 = float(scd[k])
+                    a1 = cdr(a4)[0]
+                    a6 = cdr(a4)[1]
+            
+                    # Here we append the  values to its corresponding list. 
+                    mode.append(a1) 
+                    time.append(a2)
+                    V.append(a3)
+                    I.append(a4)        
+                    cyc.append(a5) 
+                    chrg.append(a6) 
+                    
+        sl = [mode,time,V,I,cyc,chrg]
+        return sl
 
+    
+    def dup(sl):
+        # Removes duplicates
+        ind = []
+        for i in range(2,len(time)):
+            if time[i] == time[i-1]:
+                ind.append(i-1)
+                ind.append(i)
+                #ind.append(i+1)
+                #ind.append(i+2)
+        
+        for index in sorted(ind, reverse=True):
+            del mode[index]
+            del time[index]
+            del V[index]
+            del I[index]
+            del cyc[index]
+            del chrg[index]
+        return sl
+    
+    def fc(sl):
+        # Gives first cycle a cycle number
+        ind = []
+        ind2 = []    
+        nd = cyc.index(2)
+        for i in range(5,nd):
+            if mode[i] == 3:
+                ind.append(i)
+            elif mode[i] == 1:
+                ind2.append(i)
+           
+        for index in sorted(ind, reverse=True):
+            cyc[index] = 0
+            
+        for index in sorted(ind2, reverse=True):
+            cyc[index] = 1
+        
+        return sl
+        
+    def time_it(sl):
+        # Function add the time of the cycles as they iterate. 
+        # Standard of Neware is to count the accurate time per cycle, and resets it between each cycle. 
 
-def read_xlsx(filename):
-    import openpyxl as px
-    import numpy as np
+        prev_time = 0
+        for i,t in enumerate(time[1:], start = 1):
+            if t == 0 and time[i-1] > 0:
+                prev_time = time[i-1]
+                time[i] += prev_time
+            else:
+                time[i] += prev_time
+        
+        return sl
+    
+    def frame(sl):
+        # Making a dataframe from lists. Not general, only made for this purpose. 
+        # The name of the elements in the superlist
+        sl_n = ["mode", "time/s", "Ewe/V", "<I>/mA", "cycle number", "charge"]           
+        df_sl = pd.DataFrame(list(zip(sl[0],sl[1],sl[2],sl[3],sl[4],sl[5])), columns = sl_n)
+        return df_sl
+    
+    # Calling the sorting function lists
+    sfl = sorting()         # Sorted list
+    
 
-    # Open workbook
-    wb = px.load_workbook(filename)
-    # Get sheet
-    sheet = wb[wb.sheetnames[3]]
-    max_row = sheet.max_row-1 #-1 removes the first row with text
-    # Spawn arrays for all raw data of columns
-    status = []
-    voltage = np.zeros(max_row)
-    capacity = np.zeros(max_row)
+    # This function removes duplicated rows
+    #sfl_dup = dup(sfl)
+    
+    
+    # This function adjusts error with numbering the first cycle
+    sfl_adj = fc(sfl)
+    
+    # This function adds the prevoius cycle time to the next cycle. Neware only measures time per cycle, and resets time between each cycle.
+    sfl_it = time_it(sfl_adj)
+    #return sfl4
+ 
+    # Calling the dataframe function to make a dataframe out of the sorting function lists
+    df = frame(sfl_it)        # Sorted dataframe
+    
+    df.drop_duplicates(subset ="time/s", keep = False, inplace = True)
+    
+    df.experiment_mode = 1
+    df.name = os.path.basename(filepath)
 
-    # Insert all data in arrays
-    for i in range(max_row):
-        voltage[i] = sheet.cell(row=i+2, column = 7).value
-        capacity[i] = sheet.cell(row=i+2, column = 8).value
-        status.append(sheet.cell(row=i+2, column=2).value)
-
-    # Find where a charge and a discharge starts. Since charging occurs first, charges will be at even indexes of indx, eg: 0, 2, 4..
-    indx =[] # Just a list to store where in the raw data a charge (even index) or discharge (odd index)
-    for i in range(1,len(status)):
-        if status[i] == "CC Chg" and status[i-1] != "CC Chg": # If status just changed to CC Chg, this is a charge start
-            indx.append(i)
-        elif status[i] == "CC DChg" and status[i-1] != "CC DChg": # If status just changed to CC DChg, this is a discharge start
-            indx.append(i)
-    indx.append(max_row) #Inserting last elem means we catch the end cycle!
-
-    # Making lists for the cycles
-    charges = []
-    discharges = []
-
-    # Inserting slices of raw data (corresponding to 1 cycle) into the list of charges
-    for i in range(len(indx)-1): #-1 is to not run out of indexes when i+1
-        if (i % 2) == 0: #index is even -> charge cycle
-            charges.append((voltage[indx[i]:indx[i+1]], capacity[indx[i]:indx[i+1]])) #Inserting tuple of two arrays sliced to be one cycle of voltages and capacities.
-        else: #Not even? Then its a discharge cycle
-            discharges.append((voltage[indx[i]:indx[i+1]], capacity[indx[i]:indx[i+1]]))
-
-    return charges, discharges
+    return df
