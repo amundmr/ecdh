@@ -102,7 +102,7 @@ class Cell:
                 chgdat = subframe[subframe['charge'] == True].copy(deep=True)
                 dchgdat = subframe[subframe['charge'] == False].copy(deep=True)
 
-                if self.am_mass:
+                if self.am_mass or 'capacity/mAhg' not in self.df.columns:
                     #The inserted Active material mass might differ from the one the instrument software calculated. Thus we make our own capacity calculations.
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric
@@ -115,8 +115,7 @@ class Cell:
                         dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/self.am_mass
                     except:
                         dchgdat.loc[:,'capacity/mAhg'] = 0
-                    
-                    
+
 
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
