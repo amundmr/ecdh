@@ -117,6 +117,7 @@ def read_csv(filepath):
         for i in range(2,len(time)):
             if time[i] == time[i-1]:
                 ind.append(i)
+                ind.append(i-1)
         
         for index in sorted(ind, reverse=True):
             del mode[index]
