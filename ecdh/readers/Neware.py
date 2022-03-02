@@ -76,7 +76,7 @@ def read_csv(filepath):
     def sorting():
         # This function takes out the values from the csv file, handles them, and puts them in the correct lists. 
         # Initial values
-        a4,a5 = float(scd[3]), int(num[2])
+        a4,a5 = float(scd[3]), int(num[2])-1
         a1, a2,a3,a6 = cdr(a4)[0], float(time_secs(cdc[4])), float(scc[4]), cdr(a4)[1] 
         
         # The first rows are not included as they are headers. We still need some of them for initail conditons so we can't skip them in the reader.
