@@ -207,8 +207,25 @@ class Cell:
                 if self.am_mass:
                     from scipy import integrate
                     #Integrate current over time, returns mAh, divide by active mass to get gravimetric.
-                    chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/ self.am_mass
-                    dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
+
+                    try:
+                        chgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(chgdat["<I>/mA"]), chgdat["time/s"]/3600, initial = 0)/ self.am_mass
+
+                    except Exception as e:
+                        LOG.debug(f"something went wrong with the scipy.integrate.cumtrapz in cell.py under edit_GC: {e}")
+                        if not chgdat.empty:
+                            chgdat.loc[:,'capacity/mAhg'] = 0
+                        else:
+                            chgdat['capacity/mAhg'] = []
+
+                    try:
+                        dchgdat.loc[:,'capacity/mAhg'] = integrate.cumtrapz(abs(dchgdat["<I>/mA"]), dchgdat["time/s"]/3600, initial = 0)/ self.am_mass
+                    except Exception as e:
+                        LOG.debug(f"something went wrong with the scipy.integrate.cumtrapz in cell.py under edit_GC: {e}")
+                        if not dchgdat.empty:
+                            dchgdat.loc[:,'capacity/mAhg'] = 0
+                        else:
+                            dchgdat['capacity/mAhg'] = []
                 
                 def binit(x,y, Nbins = 120):
                     # extract 120 elements evenly spaced in the data
