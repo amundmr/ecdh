@@ -31,7 +31,7 @@ def read_csv(filepath):
                        sep=",\t",                   # Removes the odd \t delimiters. Critical.
                        engine='python',             # Don't remeber why I needed this one. Something with calc time?
                        skipinitialspace=True,       # Don't remeber why I needed this one. Something with calc time?
-                       #nrows = 70                   # This will chose how many lines you take out from the csv file. Convenient when handling massive files..
+                       #nrows = 70                  # This will chose how many lines you take out from the csv file. Convenient when handling massive files..
                        )                  
     
     # Defining temp list to store untreated data from csv file. 
@@ -55,7 +55,6 @@ def read_csv(filepath):
             secs = float(numb[-1])
             time = secs
         return time
-    
     
     def cdr(a4):
         # Function to separate charge/discharge/rest
@@ -86,14 +85,10 @@ def read_csv(filepath):
             # Adjusting the value of the first cycle after rest
             try:
                 q = mode.index(1)+5
+                a5 = int(num[k])
                 if int(k) == int(q):
                     a5 = a5 +1
-            except ValueError:
-                a5 = 0  
             
-            # If we have a cycle number, we make it an integer.
-            try:
-                a5 = int(num[k])
             # If we the csv column element is ',' it indicates 'Normal' line.
             except ValueError:
                 if num[k] == ',':                       # Indicates "Normal"
@@ -120,7 +115,6 @@ def read_csv(filepath):
         # Removes duplicates
         ind = []
         for i in range(2,len(time)):
-            #a0 = 8
             if time[i] == time[i-1]:
                 ind.append(i)
         
@@ -168,8 +162,9 @@ def read_csv(filepath):
         return df_sl
     
     # Calling the sorting function lists
-    sfl = sorting()         # Sorted lists
+    sfl = sorting()         # Sorted list
     
+
     # This function removes duplicated rows
     sfl2 = dup(sfl)
     
@@ -178,7 +173,8 @@ def read_csv(filepath):
     
     # This function adds the prevoius cycle time to the next cycle. Neware only measures time per cycle, and resets time between each cycle.
     sfl4 = time_it(sfl3)
-    
+    #return sfl4
+ 
     # Calling the dataframe function to make a dataframe out of the sorting function lists
     df = frame(sfl4)        # Sorted dataframe
     
