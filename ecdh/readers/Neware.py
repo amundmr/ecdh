@@ -62,13 +62,13 @@ def read_csv(filepath):
         ep = 10e-12
         if a4 >= 0+ep:
             a1 = 1
-            a6 = 'False'
+            a6 = True
         elif a4 <= 0-ep:
             a1 = 1
-            a6 = 'True'
+            a6 = False
         elif a4 == 0:
             a1 = 3
-            a6 = 'False'
+            a6 = False
             
         return a1,a6
     
