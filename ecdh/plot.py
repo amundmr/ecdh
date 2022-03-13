@@ -314,7 +314,7 @@ class Plot:
 
     def plot_raw(self,cellobj):
         """Takes a cellobject and plots it in a raw data plot (I/mA and Ewe/V vs time/s)"""
-        LOG.debug("Running plot.py plot_raw")
+        LOG.debug("Running plot.py plot_raw UPDATE")
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
@@ -336,16 +336,26 @@ class Plot:
 
             ax.set_title("Raw data")
             
+
+        #if specific cycles, then remove all other cycles
+        LOG.critical("WOW WE ARE FINDING THE SPEC CYC")
+        if cellobj.specific_cycles:
+            df = cellobj.df[cellobj.df['cycle number'].isin(cellobj.specific_cycles)]
+        else:
+            df = cellobj.df
+
+        
         #Placing it in a plot
         if self.rawplot_capacity:
-            x = cellobj.df["CumulativeCapacity/mAh/g"]
+            x = df["CumulativeCapacity/mAh/g"]
             ax.set_xlabel(r"Cumulative Capacity [$\frac{mAh}{g}$]")
         else:
-            x = cellobj.df["time/s"]/3600
+            x = df["time/s"]/3600
+
             ax.set_xlabel("Time [h]")
 
-        ax.plot(x, cellobj.df["Ewe/V"], color = cellobj.color)
-        ax2.plot(x, cellobj.df["<I>/mA"], color = cellobj.color, linestyle = "dotted")
+        ax.plot(x, df["Ewe/V"], color = cellobj.color)
+        ax2.plot(x, df["<I>/mA"], color = cellobj.color, linestyle = "dotted")
 
 
         ax.set_ylabel("Potential [V]")
