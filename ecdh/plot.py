@@ -131,12 +131,14 @@ class Plot:
 
         # Save if True, If out path specified, save there.
         if save == True:
+            """ Fix this sometime
+            handles, labels = self.axes[0].get_legend_handles_labels()
             savename = "CapRet"
             for label in labels:
-                savename += "_" + label
-            plt.savefig(savename)
+                savename += "_" + label"""
+            plt.savefig("ecdhfig.png", bbox_inches='tight')
         elif type(save) == str:
-            plt.savefig(save)
+            plt.savefig(save, bbox_inches='tight')
 
         if show == True:
             plt.show()

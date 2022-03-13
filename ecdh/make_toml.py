@@ -37,6 +37,7 @@ suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
 all_in_one = true
+savefig = false                 # Save figure, false, true or path to save to.
 
 [datatreatment]
 reduce_data = false             # Reduces large files by changing potential resolution to 10mV and time resolution to 10s (new file is saved at same location as input file)

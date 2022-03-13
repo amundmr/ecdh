@@ -89,8 +89,10 @@ def run():
         
 
 
-
-    plot.draw()
+    if 'savefig' in settings:
+        plot.draw(save = settings['savefig'])
+    else:
+        plot.draw()
 
 def main():
     if len(sys.argv) < 2:
