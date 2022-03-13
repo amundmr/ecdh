@@ -123,6 +123,11 @@ class Plot:
                 self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
             # Title also has to be adjusted
         
+        #if self.rawplot == True:
+        #self.fig.suptitle("")
+        #for ax in self.axes:
+        #    ax.set_title("")
+
         # Makes more space.
         #self.fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
@@ -316,7 +321,7 @@ class Plot:
 
     def plot_raw(self,cellobj):
         """Takes a cellobject and plots it in a raw data plot (I/mA and Ewe/V vs time/s)"""
-        LOG.debug("Running plot.py plot_raw UPDATE")
+        LOG.debug("Running plot.py plot_raw")
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
@@ -340,7 +345,6 @@ class Plot:
             
 
         #if specific cycles, then remove all other cycles
-        LOG.critical("WOW WE ARE FINDING THE SPEC CYC")
         if cellobj.specific_cycles:
             df = cellobj.df[cellobj.df['cycle number'].isin(cellobj.specific_cycles)]
         else:

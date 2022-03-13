@@ -31,6 +31,7 @@ percentage = false              # Wether or not to use percentage in capacity vs
 rawplot = true                  # Wether or not to plot Potential and Current vs time
 rawplot_capacity = false        # Wether or not to use cumulative capacity on x-axis
 vcplot = false                  # Wether or not to plot voltage curves (either CV og GC depending on data)
+nocapabs = false                # True will remove the absolute and reset of capacity for better hysteresis viewing
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
 specific_cycles = false         # Will make global limit of cycles, can be range or list of cycles
 suptitle = 'Capacity retention' # Title of plot

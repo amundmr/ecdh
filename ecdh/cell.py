@@ -132,7 +132,9 @@ class Cell:
                         else:
                             dchgdat['capacity/mAhg'] = []
 
-
+                if self.plotobj.nocapabs:
+                    #Then it should be plottet hysteresis-style
+                    x = 0
 
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
