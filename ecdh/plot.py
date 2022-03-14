@@ -120,13 +120,13 @@ class Plot:
             handles.append(Line2D([0], [0], marker='o', color='black', alpha = 0.2, label = 'Charge capacity', linestyle=''))
             if self.coulombicefficiency:
                 handles.append(Line2D([0], [0], marker='+', color='black', alpha = 0.2, label = 'Coulombic Efficiency', linestyle=''))
-            self.axes[0].legend(handles=handles)
+            self.axes[0].legend(handles=handles, loc='lower left')
             if type(self.specific_cycles) != bool:
                 self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
             # Title also has to be adjusted
         
         #if self.rawplot == True:
-        #self.fig.suptitle("")
+        #self.fig.suptitle("Cyclic voltammetry")
         #for ax in self.axes:
         #    ax.set_title("")
 
@@ -148,6 +148,7 @@ class Plot:
             plt.savefig(save, bbox_inches='tight')
 
         if show == True:
+            #plt.legend(loc='lower left')
             plt.show()
 
 
