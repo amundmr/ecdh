@@ -132,12 +132,24 @@ class Cell:
                         else:
                             dchgdat['capacity/mAhg'] = []
 
-                if self.plotobj.nocapabs:
-                    #Then it should be plottet hysteresis-style
-                    x = 0
-
                 cycle = (np.array([chgdat['capacity/mAhg'], chgdat['Ewe/V']]), np.array([dchgdat['capacity/mAhg'], dchgdat['Ewe/V']]))
                 self.GCdata.append(cycle)
+
+            if self.plotobj.hysteresisview:
+                #Then it should be plottet hysteresis-style
+                last_cycle_capacity = 0
+                for cycle in self.GCdata:
+                    #offsett all the capacity by the last cycles last capacity
+                    #cycle[1][0] += last_cycle_capacity
+                    #make the discharge capacity negative and offset it so it starts from the last charge capacity
+                    cycle[1][0] *= -1
+                    cycle[1][0] += cycle[0][0][-1]
+                    #Update the variable so the next cycle is offset by the correct amount
+                    try:
+                        last_cycle_capacity = cycle[1][0][-1]
+                    except Exception as e:
+                        LOG.debug(f"cell.py edit_GC if hysteresisview: couldn't get the last capacity element of the discharge: {e}")
+                    
             
 
     def edit_cyclelife(self):
