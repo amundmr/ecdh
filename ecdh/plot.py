@@ -118,6 +118,8 @@ class Plot:
             # Get labels and handles for legend generation and eventual savefile
             handles, labels = self.axes[0].get_legend_handles_labels()
             handles.append(Line2D([0], [0], marker='o', color='black', alpha = 0.2, label = 'Charge capacity', linestyle=''))
+            if self.coulombicefficiency:
+                handles.append(Line2D([0], [0], marker='+', color='black', alpha = 0.2, label = 'Coulombic Efficiency', linestyle=''))
             self.axes[0].legend(handles=handles)
             if type(self.specific_cycles) != bool:
                 self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
@@ -205,6 +207,12 @@ class Plot:
             #for i,cycle in enumerate(cellobj.cyclelifedata[3]):
             #    if cycle not in cellobj.specific_cycles:
 
+
+        if self.coulombicefficiency:
+            ax2 = ax.twinx()
+            ax2.set_ylabel("Coulombic Efficiency [%]")
+            ax2.set_ylim(50, 105)
+            ax2.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["coulombic efficiency"], color = cellobj.color, marker = "+")
 
     def plot_CV(self, cellobj):
         """Takes a cellobject and plots it in a CV plot (I/mA vs Ewe/V)"""

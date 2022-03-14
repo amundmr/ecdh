@@ -27,6 +27,7 @@ files = [\n"""
 
 [settings]
 qcplot = true                   # Wether or not to plot capacity vs cycles
+coulombicefficiency = true      # True will plot CE on twin x axis with cycle life in qcplot
 percentage = false              # Wether or not to use percentage in capacity vs cycles plot
 rawplot = true                  # Wether or not to plot Potential and Current vs time
 rawplot_capacity = false        # Wether or not to use cumulative capacity on x-axis

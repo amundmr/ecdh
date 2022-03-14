@@ -184,7 +184,7 @@ class Cell:
 
             self.cyclelifedata = pd.DataFrame(tmpdat, columns = ["cycle", "charge capacity/mAh", "discharge capacity/mAh"])
 
-            self.cyclelifedata["coulombic efficiency"] = self.cyclelifedata["discharge capacity/mAh"] / self.cyclelifedata["charge capacity/mAh"]
+            self.cyclelifedata["coulombic efficiency"] = self.cyclelifedata["discharge capacity/mAh"] / self.cyclelifedata["charge capacity/mAh"] * 100
 
 
     def edit_cumulative_capacity(self):
