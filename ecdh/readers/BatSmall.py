@@ -99,7 +99,11 @@ def read_txt(filepath):
             break
 
     # Read all data to a pandas dataframe
-    big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
+    try:
+        big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t")
+    except UnicodeDecodeError as e:
+        LOG.debug(f"Ran in to UnicodeDecodError in readers/BatSmall.py, reading with ANSI encoding. Error: {e}")
+        big_df = pd.read_csv(filepath, header = headerlines-1, sep = "\t", encoding = 'ANSI')
     
     #Extract useful columns, change the name of the columns, make all numbers numbers.
     def _which_cap_col(big_df):
