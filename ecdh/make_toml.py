@@ -26,7 +26,7 @@ files = [\n"""
     toml_str += """]
 
 [settings]
-qcplot = true                   # Wether or not to plot capacity vs cycles
+qcplot = false                   # Wether or not to plot capacity vs cycles
 coulombicefficiency = true      # True will plot CE on twin x axis with cycle life in qcplot
 percentage = false              # Wether or not to use percentage in capacity vs cycles plot
 rawplot = true                  # Wether or not to plot Potential and Current vs time
@@ -38,7 +38,7 @@ specific_cycles = false         # Will make global limit of cycles, can be range
 suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
-all_in_one = true
+all_in_one = false
 savefig = false                 # Save figure, false, true or path to save to.
 
 [datatreatment]
