@@ -140,7 +140,7 @@ def check_df(df):
 
 
     if df.experiment_mode == 1: #Then its GC
-        if df['cycle number'].eq(0).all(): #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
+        if df['cycle number'].eq(0).all() or df['cycle number'].max() < 20: #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
             LOG.info("We only found one cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
 
             #We fix this by counting our own cycles.
