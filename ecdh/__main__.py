@@ -47,8 +47,12 @@ def run():
             am_mass = f[1]
         except:
             am_mass = None
+        try:
+            nickname = f[2]
+        except:
+            nickname = None
 
-        cell = Cell(f[0], am_mass, plot=plot, specific_cycles = settings['specific_cycles'])
+        cell = Cell(f[0], am_mass, nickname,  plot=plot, specific_cycles = settings['specific_cycles'])
         cell.get_data()
         #cell.edit_GC()
         #cell.treat_data(settings)

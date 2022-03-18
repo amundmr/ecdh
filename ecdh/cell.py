@@ -21,7 +21,7 @@ start_cut = <int>       // Cuts specified number of cycles off the start of the 
 
 
 class Cell:
-    def __init__(self, filename, am_mass, plot = None, specific_cycles = None):
+    def __init__(self, filename, am_mass, nickname, plot = None, specific_cycles = None):
         self.fn = filename
         try:
             self.am_mass = float(am_mass)
@@ -31,7 +31,11 @@ class Cell:
             self.color = plot.get_color()
         else:
             self.color = "black"
-        self.name = os.path.basename(filename)
+
+        if nickname:
+            self.name = nickname
+        else:
+            self.name = os.path.basename(filename)
         self.plotobj = plot
         self.axes = []
         self.mode_dict = {'0': 'Unspecified', '1': 'Galvanostatic', '2': "CyclicVoltammetry", '3': "Rest"}

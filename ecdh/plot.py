@@ -113,7 +113,7 @@ class Plot:
 
 
     def draw(self, save =False, show = True):
-        
+        LOG.debug("Running plot.py draw()")
         if self.qcplot == True:
             # Get labels and handles for legend generation and eventual savefile
             handles, labels = self.axes[0].get_legend_handles_labels()
@@ -341,6 +341,10 @@ class Plot:
         else:
             if self.qcplot and self.rawplot:
                 ax = self.axes[2]
+            elif self.all_in_one and not self.qcplot:
+                ax = self.axes[0]
+            elif self.all_in_one and self.qcplot:
+                ax = self.axes[1]
             elif self.qcplot or self.rawplot: 
                 ax = self.axes[1]
             else:
@@ -350,7 +354,7 @@ class Plot:
                 self.axtwinx = ax.twinx()
             ax2 = self.axtwinx
 
-            ax.set_title("Raw data")
+            ax.set_title(self.suptitle)
             
 
         #if specific cycles, then remove all other cycles
@@ -369,7 +373,7 @@ class Plot:
 
             ax.set_xlabel("Time [h]")
 
-        ax.plot(x, df["Ewe/V"], color = cellobj.color)
+        ax.plot(x, df["Ewe/V"], color = cellobj.color, label = cellobj.name)
         ax2.plot(x, df["<I>/mA"], color = cellobj.color, linestyle = "dotted")
 
 
