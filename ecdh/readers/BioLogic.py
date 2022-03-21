@@ -93,7 +93,6 @@ def read_mpt(filepath):
     df['charge'].replace({1: True, 0: False}, inplace = True)
 
     if mode == 2:
-        LOG.critical("Running new data treatemnt function")
         # If it is CV data, then BioLogic counts the cycles in a weird way (starting new cycle when passing the point of the OCV, not when starting a charge or discharge..) so we need to count our own cycles
         
         df['cycle number'] = df['charge'].ne(df['charge'].shift()).cumsum()
