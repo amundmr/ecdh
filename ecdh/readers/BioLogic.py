@@ -95,15 +95,6 @@ def read_mpt(filepath):
     if mode == 2:
         LOG.critical("Running new data treatemnt function")
         # If it is CV data, then BioLogic counts the cycles in a weird way (starting new cycle when passing the point of the OCV, not when starting a charge or discharge..) so we need to count our own cycles
-        first_charge = df['charge'].iloc[0]
-        prev_charge = df['charge'].iloc[0]
-        curr_cyc = 0
-        for i,charge in df['charge'].items():
-            if charge != prev_charge: #If the charge state changes
-                if charge == first_charge: #If the charge state changes to the same as the inital charge we have a new cycle
-                    curr_cyc += 1
-                prev_charge = charge
-            df['cycle number'].iloc[i] = curr_cyc
         
         df['cycle number'] = df['charge'].ne(df['charge'].shift()).cumsum()
         df['cycle number'] = df['cycle number'].floordiv(2)
