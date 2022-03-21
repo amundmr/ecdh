@@ -133,8 +133,9 @@ class Plot:
         # Makes more space.
         #self.fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-        if self.all_in_one is True:
-            plt.legend()
+        # DO NOT NEED THIS since the colorbars display the color and names of the samples..
+        #if self.all_in_one is True:
+        #    plt.legend()
 
         # Save if True, If out path specified, save there.
         if save == True:
@@ -225,10 +226,6 @@ class Plot:
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Cyclic Voltammograms")
-            # Add legend label
-            handles, labels = ax.get_legend_handles_labels()
-            handles.append(Line2D([0], [0], marker='_', color=cellobj.color, label = cellobj.name, linestyle=''))
-            ax.legend(handles=handles)
             
         #Placing it in a plot with correct colors
         self.insert_cycle_data(cellobj, ax, cellobj.CVdata)
