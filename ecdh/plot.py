@@ -225,6 +225,10 @@ class Plot:
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Cyclic Voltammograms")
+            # Add legend label
+            handles, labels = ax.get_legend_handles_labels()
+            handles.append(Line2D([0], [0], marker='_', color=cellobj.color, label = cellobj.name, linestyle=''))
+            ax.legend(handles=handles)
             
         #Placing it in a plot with correct colors
         self.insert_cycle_data(cellobj, ax, cellobj.CVdata)
@@ -295,7 +299,10 @@ class Plot:
                         colorlist = colorlist[1:]
 
                         chg, dchg = cycle
-                        ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
+                        if self.all_in_one is True:
+                            ax.plot(chg[0], chg[1], color = color, label = f"{cellobj.name} Cycle {i}") #This is the charge cycle
+                        else:
+                            ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
                         ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
             else:
                 for i,cycle in enumerate(data):
@@ -304,7 +311,10 @@ class Plot:
                     colorlist = colorlist[1:]
 
                     chg, dchg = cycle
-                    ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
+                    if self.all_in_one is True:
+                        ax.plot(chg[0], chg[1], color = color, label = f"{cellobj.name} Cycle {i}") #This is the charge cycle
+                    else:
+                        ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
                     ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
 
 
