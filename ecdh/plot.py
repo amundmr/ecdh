@@ -221,7 +221,7 @@ class Plot:
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
-            ax.set_title("CV: {}".format(os.path.basename(cellobj.fn)))
+            ax.set_title(f"{cellobj.name}")
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Cyclic Voltammograms")
@@ -242,7 +242,7 @@ class Plot:
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
-            ax.set_title("GC: {}".format(os.path.basename(cellobj.fn)))
+            ax.set_title(f"{cellobj.name}")
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
             ax.set_title("Galvanostatic Cycling")
