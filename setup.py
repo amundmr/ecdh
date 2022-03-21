@@ -8,7 +8,7 @@ setuptools.setup(
     name = 'ecdh',
     packages = ['ecdh'],
     include_package_data = True,
-    version = '0.1.3',     # Remember to update on new version
+    version = '0.1.4',     # Remember to update on new version
     license='GNU General Public License v3.0',        
     description = 'ElectroChemical Data Handler',
     long_description=long_description,
@@ -16,7 +16,7 @@ setuptools.setup(
     author = 'Amund Raniseth',                   
     author_email = 'amund.raniseth@gmail.com',      
     url = 'https://github.com/amundmr/ecdh',   
-    download_url = 'https://github.com/amundmr/ecdh/archive/refs/tags/v0.1.3.tar.gz',    # Remember to update this with new versions
+    download_url = 'https://github.com/amundmr/ecdh/archive/refs/tags/v0.1.4.tar.gz',    # Remember to update this with new versions
     keywords = ['Electrochemical', 'battery', 'cell', 'datareader', 'dataplotter', 'reader', 'plotter'],
     install_requires=[
             'matplotlib',
