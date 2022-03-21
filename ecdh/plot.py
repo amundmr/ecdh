@@ -133,9 +133,9 @@ class Plot:
         # Makes more space.
         #self.fig.subplots_adjust(hspace=0.4, wspace=0.4)
 
-        # DO NOT NEED THIS since the colorbars display the color and names of the samples..
-        #if self.all_in_one is True:
-        #    plt.legend()
+        
+        if self.all_in_one is True:
+            plt.legend()
 
         # Save if True, If out path specified, save there.
         if save == True:
