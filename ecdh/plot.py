@@ -120,7 +120,12 @@ class Plot:
             handles.append(Line2D([0], [0], marker='o', color='black', alpha = 0.2, label = 'Charge capacity', linestyle=''))
             if self.coulombicefficiency:
                 handles.append(Line2D([0], [0], marker='+', color='black', alpha = 0.2, label = 'Coulombic Efficiency', linestyle=''))
-            self.axes[0].legend(handles=handles, loc='lower left')
+            try:
+                loc = self.legend_location
+            except Exception as e:
+                loc = 'best'
+                LOG.debug(f"Plot.py draw(), error with legend_location setting: {e}")
+            self.axes[0].legend(handles=handles, loc=loc)
             if type(self.specific_cycles) != bool:
                 self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
             # Title also has to be adjusted

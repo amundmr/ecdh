@@ -38,6 +38,7 @@ specific_cycles = false         # Will make global limit of cycles, can be range
 suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
+legend_location = 'best'        # Options: 'best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center', 'center'
 all_in_one = false
 savefig = false                 # Save figure, false, true or path to save to.
 
