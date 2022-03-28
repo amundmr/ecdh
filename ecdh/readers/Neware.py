@@ -133,22 +133,41 @@ def read_csv(filepath):
     def fc(sl):
         # Gives first cycle a cycle number
         ind = []
-        ind2 = []    
-        nd = cyc.index(2)
-        for i in range(5,nd):
-            if mode[i] == 3:
-                ind.append(i)
-            elif mode[i] == 1:
-                ind2.append(i)
-           
-        for index in sorted(ind, reverse=True):
-            cyc[index] = 0
+        ind2 = []
+        
+        try:
+            nd = cyc.index(2)       # Point where you start 1st cycle.
+            for i in range(5,nd):
+                if mode[i] == 3:
+                    ind.append(i)
+                elif mode[i] == 1:
+                    ind2.append(i)
             
-        for index in sorted(ind2, reverse=True):
-            cyc[index] = 1
+            for index in sorted(ind, reverse=True):
+                cyc[index] = 0
+                    
+            for index in sorted(ind2, reverse=True):
+                cyc[index] = 1
+        
+        except ValueError:
+            for i in range(len(cyc)):
+                if abs(I[i]) > (10e-8):
+                    cyc[i] = 1
+                else: 
+                    cyc[i] = 0
+        
+        #eps,q = 10e-8, 0
+        #for i in range(len(cyc)):
+        #    if cyc[i-1]+eps < cyc[i]: 
+        #        q = q + 1
+        #        cyc[i] = cyc[i] + q
+        #    elif cyc[i] < eps: 
+        #        cyc[i] = cyc[i]
+        #    else:
+        #        cyc[i] = cyc[i-1]
         
         return sl
-        
+    
     def time_it(sl):
         # Function add the time of the cycles as they iterate. 
         # Standard of Neware is to count the accurate time per cycle, and resets it between each cycle. 
@@ -192,5 +211,5 @@ def read_csv(filepath):
     
     df.experiment_mode = 1
     df.name = os.path.basename(filepath)
-
+    
     return df
