@@ -44,8 +44,8 @@ savefig = false                 # Save figure, false, true or path to save to.
 
 [datatreatment]
 reduce_data = false             # Reduces large files by changing potential resolution to 10mV and time resolution to 10s (new file is saved at same location as input file)
-dt = 10                         # Maximum voltage which goes by unrecorded
-dV = 0.01                       # Maximum time which goes by unrecorded
+dt = 10                         # Maximum time which goes by unrecorded
+dV = 0.01                       # Maximum voltage which goes by unrecorded
 smooth_data = false             # removes outliers, new file saved at same location as input file
 print_capacities = false        # Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]
 """
