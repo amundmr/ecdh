@@ -229,7 +229,10 @@ class Plot:
             ax.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["discharge capacity/mAh"],color = cellobj.color, label = cellobj.name)
 
         else: #There are specific cycles
-            LOG.error("Specific cycles hasnt been implemented in lifecycle plot")
+            #LOG.error("Specific cycles hasnt been implemented in lifecycle plot")
+            filtered_data = cellobj.cyclelifedata[cellobj.cyclelifedata['cycle'].isin(cellobj.specific_cycles)]
+            ax.scatter(filtered_data["cycle"]+1, filtered_data["charge capacity/mAh"],color = cellobj.color, alpha = 0.2)
+            ax.scatter(filtered_data["cycle"]+1, filtered_data["discharge capacity/mAh"],color = cellobj.color, label = cellobj.name)
             #colorlist = self.colors
             #for i,cycle in enumerate(cellobj.cyclelifedata[3]):
             #    if cycle not in cellobj.specific_cycles:
@@ -239,7 +242,12 @@ class Plot:
             ax2 = ax.twinx()
             ax2.set_ylabel("Coulombic Efficiency [%]")
             ax2.set_ylim(50, 105)
-            ax2.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["coulombic efficiency"], color = cellobj.color, marker = "+")
+            if not cellobj.specific_cycles: #Not specific cycles? then plot all.
+                ax2.scatter(cellobj.cyclelifedata["cycle"]+1, cellobj.cyclelifedata["coulombic efficiency"], color = cellobj.color, marker = "+")
+            else:
+                filtered_data = cellobj.cyclelifedata[cellobj.cyclelifedata['cycle'].isin(cellobj.specific_cycles)]
+                ax2.scatter(filtered_data["cycle"]+1, filtered_data["coulombic efficiency"], color = cellobj.color, marker = "+")
+
 
     def plot_CV(self, cellobj):
         """Takes a cellobject and plots it in a CV plot (I/mA vs Ewe/V)"""
@@ -297,14 +305,32 @@ class Plot:
 
 
         # Plot it
-        if not cellobj.specific_cycles and Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
-            for i,cycle in enumerate(data):
-                chg, dchg = cycle
-                ax.plot(chg[0], chg[1], color = cmap(i/Nc))
-                ax.plot(dchg[0], dchg[1], color = cmap(i/Nc))
+        ## count number of specific cycles
+        if cellobj.specific_cycles:
+            numcyc = len(cellobj.specific_cycles)
+        else:
+            numcyc = 0
+
+        if numcyc > 5 or Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
+            if cellobj.specific_cycles:
+                maxcyc = max(cellobj.specific_cycles)
+                for i,cycle in enumerate(data):
+                    if i in cellobj.specific_cycles:
+                        chg, dchg = cycle
+                        ax.plot(chg[0], chg[1], color = cmap(i/maxcyc))
+                        ax.plot(dchg[0], dchg[1], color = cmap(i/maxcyc))
+            else:
+                for i,cycle in enumerate(data):
+                    chg, dchg = cycle
+                    ax.plot(chg[0], chg[1], color = cmap(i/Nc))
+                    ax.plot(dchg[0], dchg[1], color = cmap(i/Nc))
 
             # Adding colorbar to plot
-            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=Nc))
+            if cellobj.specific_cycles:
+                maxcyc = max(cellobj.specific_cycles)
+            else:
+                maxcyc = Nc
+            sm = plt.cm.ScalarMappable(cmap=cmap, norm=plt.Normalize(vmin=0, vmax=maxcyc))
             sm._A = []
             if self.all_in_one is True:
                 self.fig.colorbar(sm, ax=ax, label = "Cycle number for {}".format(cellobj.name))

@@ -85,9 +85,9 @@ def read_mpt(filepath):
     for col in df.columns:
         if df.dtypes[col] == str: #the str.replace only works and is only needed if it is a string
             df[col] = pd.to_numeric(df[col].str.replace(',','.'))
-    df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
-    df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
-    df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
+    #df['time/s'] = pd.to_numeric(df['time/s'].str.replace(',','.'))
+    #df['Ewe/V'] = pd.to_numeric(df['Ewe/V'].str.replace(',','.'))
+    #df['<I>/mA'] = pd.to_numeric(df['<I>/mA'].str.replace(',','.'))
     #df['cycle number'] = pd.to_numeric(df['cycle number'].str.replace(',','.')).astype('int32')
     df.rename(columns={'ox/red': 'charge'}, inplace=True)
     df['charge'].replace({1: True, 0: False}, inplace = True)

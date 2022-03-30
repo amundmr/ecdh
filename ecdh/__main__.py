@@ -30,6 +30,19 @@ def run():
     toml_str = open(path, "r").read()
     config = toml.loads(toml_str)
     settings = config["settings"]
+    # Merge cycle range into specific cycles
+    if settings['cycle_range']:
+        try:
+            cyclerange = np.linspace(settings['cycle_range'][0], settings['cycle_range'][1], settings['cycle_range'][1]-settings['cycle_range'][0] + 1).astype(int)
+            if type(settings['specific_cycles']) is bool:
+                settings['specific_cycles'] = cyclerange.tolist()
+            else:
+                settings['specific_cycles'] += cyclerange.tolist()
+            LOG.error(f"Specific cycles: {settings['specific_cycles']}")
+        except Exception as e:
+            LOG.warning(f"Could not use the cycle range, Error: {e}")
+
+
     datatreatment = config["datatreatment"]
 
     # Check that files are found

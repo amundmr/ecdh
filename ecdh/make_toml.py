@@ -35,6 +35,7 @@ vcplot = false                  # Wether or not to plot voltage curves (either C
 hysteresisview = false          # True will remove the absolute and reset of capacity for better hysteresis viewing
 dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
 specific_cycles = false         # Will make global limit of cycles, can be range or list of cycles
+cycle_range = false             # Cycle range you want to plot in list format like [10, 40]
 suptitle = 'Capacity retention' # Title of plot
 ylabel = 'Specific capacity [mAh/g]'
 xlabel = 'Cycles'
