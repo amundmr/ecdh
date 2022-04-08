@@ -54,3 +54,16 @@ print_capacities = false        # Will print the capacity of the plotted cycles 
     with open("ecdh.toml", "w") as f:
         f.write(toml_str)
         LOG.info("Wrote example configuration to 'ecdh.toml' with %.0f files found"%len(files))
+
+cfg_dict = {"settings": {
+                "qcplot": False,
+                "coulombicefficiency": True,
+                "percentage": False,
+                },
+            "datatreatment": {
+                "reduce_data": False,
+                "dt": 10,
+                "dv": 0.01,
+                "smooth_data": False,
+                }
+            }
