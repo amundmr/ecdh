@@ -51,7 +51,8 @@ files = [\n"""
         LOG.warning("Could not find any files in the current folder!")
         toml_str += '\t[" ","1.0"],\n'
 
-    toml_str += """]
+    #toml_str += 
+    """]
 
 [settings]
 qcplot = false                   # Wether or not to plot capacity vs cycles
@@ -78,6 +79,7 @@ dV = 0.01                       # Maximum voltage which goes by unrecorded
 smooth_data = false             # removes outliers, new file saved at same location as input file
 print_capacities = false        # Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]
 """
+    toml_str += gen_string(cfg_dict)
 
     with open("ecdh.toml", "w") as f:
         f.write(toml_str)
@@ -115,4 +117,4 @@ def fill_config(dictionary):
         if key not in dictionary:
             dictionary[key] = value[0]
 
-#gen_string(cfg_dict)
+gen_string(cfg_dict)
