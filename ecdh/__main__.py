@@ -6,7 +6,7 @@ from ecdh.log import LOG
 LOG.set_level("DEBUG")
 from ecdh.readers import check_files
 
-from ecdh.make_toml import make_toml
+from ecdh.conf import read_config, make_toml
 from ecdh.plot import *
 from ecdh.cell import *
 
@@ -27,8 +27,9 @@ def run():
         LOG.error("Cannot find the .toml configuration file!")
         sys.exit()
     LOG.debug("Reading config file: '{}'".format(path))
-    toml_str = open(path, "r").read()
-    config = toml.loads(toml_str)
+
+    # Read in configuration file
+    config = read_config(path)
     settings = config["settings"]
     # Merge cycle range into specific cycles
     if settings['cycle_range']:
