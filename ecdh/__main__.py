@@ -10,11 +10,11 @@ from ecdh.conf import read_config, make_toml
 from ecdh.plot import *
 from ecdh.cell import *
 
-import toml
+
 import sys
 
 def run():
-
+    import sys
     if len(sys.argv) < 3: #Then no folder is specified, look for toml in local folder.
         if os.path.isfile("./ecdh.toml"):
             path = "./ecdh.toml"
@@ -48,6 +48,10 @@ def run():
 
     # Check that files are found
     files = check_files(config["files"])
+    if len(files) == 0:
+        import sys
+        LOG.error("Could not load any datafiles. Exiting. Check that the filepaths are typed correctly in the configuration file.")
+        sys.exit()
     LOG.success("Running ECDH: Found {} datafiles!".format(len(files)))
 
     # Define plot specifications

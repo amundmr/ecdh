@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
+import toml
 from ecdh.log import LOG
 
 cfg_dict = {"settings": {
@@ -13,9 +14,9 @@ cfg_dict = {"settings": {
                 "dqdvplot":             (False, "Wether or not to plot dQ/dV plots from the GCPL data"),
                 "specific_cycles":      (False, "Will make global limit of cycles, can be range or list of cycles"),
                 "cycle_range":          (False, "Cycle range you want to plot in list format like [10, 40]"),
-                "suptitle":             (False, "Title of plot"),
-                "ylabel":               (False, "Y Abcissa label"),
-                "xlabel":               (False, "X Abcissa label"),
+                "suptitle":             (False, "Title of plot                      "),
+                "ylabel":               (False, "Y Abcissa label                    "),
+                "xlabel":               (False, "X Abcissa label                    "),
                 "legend_location":      ('best', "Options: 'best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center', 'center'"),
                 "all_in_one":           (False, "[NOT WORKING]Puts all different datafiles in same plot"),
                 "savefig":              (False, "Save figure, false, true or path to save to."),
@@ -51,34 +52,6 @@ files = [\n"""
         LOG.warning("Could not find any files in the current folder!")
         toml_str += '\t[" ","1.0"],\n'
 
-    #toml_str += 
-    """]
-
-[settings]
-qcplot = false                   # Wether or not to plot capacity vs cycles
-coulombicefficiency = true      # True will plot CE on twin x axis with cycle life in qcplot
-percentage = false              # Wether or not to use percentage in capacity vs cycles plot
-rawplot = true                  # Wether or not to plot Potential and Current vs time
-rawplot_capacity = false        # Wether or not to use cumulative capacity on x-axis
-vcplot = false                  # Wether or not to plot voltage curves (either CV og GC depending on data)
-hysteresisview = false          # True will remove the absolute and reset of capacity for better hysteresis viewing
-dqdvplot = false                # Wether or not to plot dQ/dV plots from the GCPL data
-specific_cycles = false         # Will make global limit of cycles, can be range or list of cycles
-cycle_range = false             # Cycle range you want to plot in list format like [10, 40]
-suptitle = 'Capacity retention' # Title of plot
-ylabel = 'Specific capacity [mAh/g]'
-xlabel = 'Cycles'
-legend_location = 'best'        # Options: 'best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center', 'center'
-all_in_one = false
-savefig = false                 # Save figure, false, true or path to save to.
-
-[datatreatment]
-reduce_data = false             # Reduces large files by changing potential resolution to 10mV and time resolution to 10s (new file is saved at same location as input file)
-dt = 10                         # Maximum time which goes by unrecorded
-dV = 0.01                       # Maximum voltage which goes by unrecorded
-smooth_data = false             # removes outliers, new file saved at same location as input file
-print_capacities = false        # Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]
-"""
     toml_str += gen_string(cfg_dict)
 
     with open("ecdh.toml", "w") as f:
@@ -87,13 +60,26 @@ print_capacities = false        # Will print the capacity of the plotted cycles 
 
 def gen_string(cfg_dict):
     masterstr = ""
-    for key, item in cfg_dict:
+    for key, item in cfg_dict.items():
         masterstr += "[" + key + "]\n"
-        for subkey, subitem in item:
-            masterstr += subkey + " = " + subitem[0] + "\t# " + subitem[1]
+        lines = []
+        for subkey, subitem in item.items():
+            if type(subitem[0]) is bool or type(subitem[0]) is float or type(subitem[0]) is int:
+                kwarg_default_value = str(subitem[0]).lower()
+            elif type(subitem[0]) is str:
+                kwarg_default_value = "'" + str(subitem[0]) + "'"
+            else:
+                LOG.debug("Keyword in cfg_dict conf.py found to be neither str nor bool nor float nor int. This needs special handling.")
+                kwarg_default_value = "false"
+
+            left_align = subkey + " = " + kwarg_default_value
+            center_align = "# " + subitem[1]
+            lines.append(f"{left_align : <30} {center_align : ^30}")
+
+        for line in lines:
+            masterstr += line + "\n"
         masterstr += "\n"
-    with open("testcfg.toml") as f:
-        f.write(masterstr)
+
 
 def read_config(path):
     try:
@@ -107,14 +93,21 @@ def read_config(path):
     check_config(toml_str)
     # Fill toml config
     config = toml.loads(toml_str)
-    fill_config(config)
+    config = fill_config(config)
+    return config
 
 def check_config(string):
     return 0
 
 def fill_config(dictionary):
-    for key, value in cfg_dict:
-        if key not in dictionary:
-            dictionary[key] = value[0]
 
-gen_string(cfg_dict)
+    # Hardcoding this to save time
+    for key, value in cfg_dict["settings"].items():
+        if key not in dictionary["settings"]:
+                dictionary["settings"][key] = value[0]
+
+    for key, value in cfg_dict["datatreatment"].items():
+        if key not in dictionary["datatreatment"]:
+                dictionary["datatreatment"][key] = value[0]
+
+    return dictionary
