@@ -207,6 +207,7 @@ def check_df(df):
 def clean_df(df):
     """
     Author: Amund M. Raniseth
+    19.04.2022
     Features:
     - Removes time-shifts occuring in the data
     """
