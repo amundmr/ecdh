@@ -52,6 +52,7 @@ files = [\n"""
         LOG.warning("Could not find any files in the current folder!")
         toml_str += '\t[" ","1.0"],\n'
 
+    toml_str += "\n"
     toml_str += gen_string(cfg_dict)
 
     with open("ecdh.toml", "w") as f:
@@ -79,7 +80,7 @@ def gen_string(cfg_dict):
         for line in lines:
             masterstr += line + "\n"
         masterstr += "\n"
-
+    return masterstr
 
 def read_config(path):
     try:

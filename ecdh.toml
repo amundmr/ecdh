@@ -1,0 +1,29 @@
+# "Data path", "active mass" and "nickname" (set active mass to 1 if data is normalized with regards to active mass)
+files = [
+	["LICENSE.txt","1.0"],
+
+[settings]
+qcplot = false                 # Wether or not to plot capacity vs cycles
+coulombicefficiency = true     # True will plot CE on twin x axis with cycle life in qcplot
+percentage = false             # Wether or not to use percentage in capacity vs cycles plot
+rawplot = true                 # Wether or not to plot Potential and Current vs time
+rawplot_capacity = false       # Wether or not to use cumulative capacity on x-axis
+vcplot = false                 # Wether or not to plot voltage curves (either CV og GC depending on data)
+hysteresisview = false         # True will remove the absolute and reset of capacity for better hysteresis viewing
+dqdvplot = false               # Wether or not to plot dQ/dV plots from the GCPL data
+specific_cycles = false        # Will make global limit of cycles, can be range or list of cycles
+cycle_range = false            # Cycle range you want to plot in list format like [10, 40]
+suptitle = false               # Title of plot                      
+ylabel = false                 # Y Abcissa label                    
+xlabel = false                 # X Abcissa label                    
+legend_location = 'best'       # Options: 'best', 'upper right', 'upper left', 'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center', 'upper center', 'center'
+all_in_one = false             # [NOT WORKING]Puts all different datafiles in same plot
+savefig = false                # Save figure, false, true or path to save to.
+
+[datatreatment]
+reduce_data = false            # Reduces large files by changing potential resolution to 10mV and time resolution to 10s (new file is saved at same location as input file)
+dt = 10                        # Maximum time which goes by unrecorded
+dv = 0.01                      # Maximum voltage change which goes by unrecorded
+smooth_data = false            # removes outliers, new file saved at same location as input file
+print_capacities = false       # Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]
+
