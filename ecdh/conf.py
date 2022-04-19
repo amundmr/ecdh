@@ -52,7 +52,7 @@ files = [\n"""
         LOG.warning("Could not find any files in the current folder!")
         toml_str += '\t[" ","1.0"],\n'
 
-    toml_str += "\n"
+    toml_str += "]\n\n"
     toml_str += gen_string(cfg_dict)
 
     with open("ecdh.toml", "w") as f:

@@ -113,14 +113,22 @@ def read_txt(filepath):
             elif 'C [Ah/kg]' in col:
                 return 'C [Ah/kg]'
 
-    df = big_df[['TT [h]', 'U [V]', 'I [mA]', 'Z1 []', _which_cap_col(big_df)]]
+    def _which_time_col(big_df):
+        for col in big_df.columns:
+            if 'TT [h]' in col:
+                return 'TT [h]'
+            elif 'TT [s]' in col:
+                return 'TT [s]'
+
+    df = big_df[[_which_time_col(big_df), 'U [V]', 'I [mA]', 'Z1 []', _which_cap_col(big_df)]]
     del big_df #deletes the dataframe
     gc.collect() #Clean unused memory (which is the dataframe above)
     if 'C [Ah/kg]' in df.columns:
         df['C [Ah/kg]'] = df['C [Ah/kg]'].apply(lambda x: abs(x*1000)) #Convert from Ah/kg to mAh/kg
     df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] #Renaming the columns. columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
-    df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
+    if 'TT [h]' in df.columns:
+        df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
     df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to mAh/g
     df['mode'] = expmode
     df['charge'] = True
@@ -128,6 +136,8 @@ def read_txt(filepath):
     df.name = os.path.basename(filepath)
     
     check_df(df)
+
+    df = clean_df(df)
 
     return df
 
@@ -194,5 +204,27 @@ def check_df(df):
                     df['charge'].at[i-1] = False
 
 
+def clean_df(df):
+    """
+    Author: Amund M. Raniseth
+    Features:
+    - Removes time-shifts occuring in the data
+    """
 
+    df.reset_index(inplace = True) # The loop below relies on perfect indexing
+    df["dt"] = df["time/s"].diff() # Make a column with timedeltas
+
+    largedtindexes = df[df["dt"] > 60].index.values #Retrieve all indexes where timedelta is larger than 60
+
+    # Loop to correct time shift. Reversed in order to properly shift all remaining time
+    for indx in largedtindexes[::-1]:
+        # Find time before shift and time after shift
+        starttime = df.at[indx-1, "time/s"]
+        endtime = df.at[indx, "time/s"]
+        # shift time from this index and out
+        df.loc[indx : , "time/s"] -= (endtime-starttime)
+
+
+
+    return df
                 
