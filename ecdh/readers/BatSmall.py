@@ -120,20 +120,33 @@ def read_txt(filepath):
             elif 'TT [s]' in col:
                 return 'TT [s]'
 
+
+    # Drop rows with comments as these are either change of program and have duplicate data or may be EIS type data
+    big_df.drop(big_df.dropna(subset=['Comment']).index, inplace= True)
+    big_df.reset_index(inplace=True)
+
+
     df = big_df[[_which_time_col(big_df), 'U [V]', 'I [mA]', 'Z1 []', _which_cap_col(big_df)]]
     del big_df #deletes the dataframe
     gc.collect() #Clean unused memory (which is the dataframe above)
-    if 'C [Ah/kg]' in df.columns:
-        df['C [Ah/kg]'] = df['C [Ah/kg]'].apply(lambda x: abs(x*1000)) #Convert from Ah/kg to mAh/kg
+
+    # Transform units of colums
+    if 'C [mAh/kg]' in df.columns:
+        df['C [mAh/kg]'] = df['C [mAh/kg]'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to Ah/kg which is equal to mAh/g
+    if 'TT [h]' in df.columns:
+        df['TT [h]'] = df['TT [h]'].apply(lambda x: x*3600) #Converting from h to s
+    
+    # Rename columns and assure datatype
     df.columns = ['time/s','Ewe/V', '<I>/mA', 'cycle number', 'capacity/mAhg'] #Renaming the columns. columns={'TT [h]': 'time/s', 'U [V]': 'Ewe/V', 'I [mA]': '<I>/mA', 'Z1 []':'cycle number', 'C [mAh/kg]':'capacity/mAhg'}, inplace=True)
     df = df.astype({"time/s": float, "Ewe/V": float, "<I>/mA": float, "capacity/mAhg": float, "cycle number": int})
-    if 'TT [h]' in df.columns:
-        df['time/s'] = df['time/s'].apply(lambda x: x*3600) #Converting from h to s
-    df['capacity/mAhg'] = df['capacity/mAhg'].apply(lambda x: abs(x/1000)) #Convert from mAh/kg to mAh/g
+
     df['mode'] = expmode
     df['charge'] = True
     df.experiment_mode = expmode
     df.name = os.path.basename(filepath)
+
+    
+
     
     check_df(df)
 
@@ -145,6 +158,7 @@ def check_df(df):
     """Check if the dataframe has:
     - cycle number (sometimes the Z1 counter fucks up and just says 0)
     - If it is GC data: then calculate capacity
+    - removing data where the cell is resting
     
     If anything is wrong, it tries to fix it"""
 
@@ -186,7 +200,7 @@ def check_df(df):
                 df['cycle number'].at[i] = cycle_number
 
             #Remove rows where a new experiment start (BatSmall has fucked datalogging here, where the current and voltage is the same as the prev step, but the capacity restarts)
-            df.drop(new_cycle_indexes, axis = 0, inplace = True)
+            #df.drop(new_cycle_indexes, axis = 0, inplace = True)
 
             if cycle_number > 1:
                 LOG.info("Found {} cycles in {}".format(cycle_number, df.name))
@@ -204,17 +218,18 @@ def check_df(df):
                     df['charge'].at[i-1] = False
 
 
+
 def clean_df(df):
     """
     Author: Amund M. Raniseth
     19.04.2022
     Features:
-    - Removes time-shifts occuring in the data
     - Does rolling average of time over 10 elements since only 5 significant digits is given by CCCCtool (the instrument data export software)
+    - Removes time-shifts occuring in the data
     """
 
     ## Rolling Averagedf.rolling(window=5)['MA'].mean()
-    df["time/s"] = df.rolling(window=10)["time/s"].mean()
+    df["time/s"] = df.rolling(window=10, center = True, min_periods=1)["time/s"].mean()
 
 
     # Remove time-shifts
