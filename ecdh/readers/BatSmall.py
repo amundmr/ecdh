@@ -210,10 +210,18 @@ def clean_df(df):
     19.04.2022
     Features:
     - Removes time-shifts occuring in the data
+    - Does rolling average of time over 10 elements since only 5 significant digits is given by CCCCtool (the instrument data export software)
     """
 
+    ## Rolling Averagedf.rolling(window=5)['MA'].mean()
+    df["time/s"] = df.rolling(window=10)["time/s"].mean()
+
+
+    # Remove time-shifts
     df.reset_index(inplace = True) # The loop below relies on perfect indexing
     df["dt"] = df["time/s"].diff() # Make a column with timedeltas
+    average_timedelta = df[df["dt"] > 0]["dt"].mean()
+    print(f"Average timedelta: {average_timedelta}")
 
     largedtindexes = df[df["dt"] > 60].index.values #Retrieve all indexes where timedelta is larger than 60
 
@@ -223,8 +231,7 @@ def clean_df(df):
         starttime = df.at[indx-1, "time/s"]
         endtime = df.at[indx, "time/s"]
         # shift time from this index and out
-        df.loc[indx : , "time/s"] -= (endtime-starttime)
-
+        df.loc[indx : , "time/s"] -= (endtime-starttime - average_timedelta)
 
 
     return df
