@@ -80,7 +80,10 @@ class Plot:
             self.axes = self.axes.reshape(-1)
         else:
             self.fig, self.axes = plt.subplots(nrows = self.subplots)
-        self.fig.suptitle(str(date.today()))
+        if self.suptitle:
+            self.fig.suptitle(self.suptitle)
+        else:
+            self.fig.suptitle(str(date.today()))
 
         #Make sure self.axes is a list if it is only 1 element
         try:
@@ -112,7 +115,7 @@ class Plot:
                 ylabel = 'Specific capacity [mAh/g]'
             
             self.axes[0].set(
-                title = 'Cycle life',
+                title = 'Cycle life' if len(self.axes) != 1 else '',
                 ylabel = ylabel,
                 xlabel = 'Cycles'
             )
@@ -141,7 +144,8 @@ class Plot:
                 LOG.debug(f"Plot.py draw(), error with legend_location setting: {e}")
             self.axes[0].legend(handles=handles, loc=loc)
             if type(self.specific_cycles) != bool:
-                self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
+                #self.axes[0].scatter(self.specific_cycles, np.zeros(len(self.specific_cycles)), marker = "|")
+                x = 0
             # Title also has to be adjusted
         
         #if self.rawplot == True:

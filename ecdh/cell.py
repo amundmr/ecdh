@@ -11,7 +11,7 @@ import ecdh.utils as utils
 
 
 """
-# Cell class specifications
+# Cell class specifications ***OUTDATED***
 1st argument = <string> // Path of file to be plotted
 2nd argument = <string> // Active mass of whatever the data is made on
 plot = <plot> object    // Describes which plot object to use. Normally this is the one specified above

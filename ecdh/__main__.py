@@ -39,7 +39,7 @@ def run():
                 settings['specific_cycles'] = cyclerange.tolist()
             else:
                 settings['specific_cycles'] += cyclerange.tolist()
-            LOG.error(f"Specific cycles: {settings['specific_cycles']}")
+            LOG.info(f"Specific cycles: {settings['specific_cycles']}")
         except Exception as e:
             LOG.warning(f"Could not use the cycle range, Error: {e}")
 
