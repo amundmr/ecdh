@@ -79,11 +79,13 @@ class Plot:
             self.fig, self.axes = plt.subplots(nrows = rows, ncols = cols)
             self.axes = self.axes.reshape(-1)
         else:
-            self.fig, self.axes = plt.subplots(nrows = self.subplots)
+            self.fig, self.axes = plt.subplots(ncols = self.subplots)
         if self.suptitle:
             self.fig.suptitle(self.suptitle)
         else:
             self.fig.suptitle(str(date.today()))
+
+        self.fig.tight_layout()
 
         #Make sure self.axes is a list if it is only 1 element
         try:
@@ -109,10 +111,16 @@ class Plot:
             self.taken_subplots +=1
             # Dealing with percentage
             if self.percentage == True:
-                ylabel = 'Capacity retention [%]'
+                if self.ylabel:
+                    ylabel = self.ylabel
+                else:
+                    ylabel = 'Capacity retention [%]'
                 self.axes[0].yaxis.set_major_formatter(mtick.PercentFormatter(xmax = 1, decimals = 0))
             else:
-                ylabel = 'Specific capacity [mAh/g]'
+                if self.ylabel:
+                    ylabel = self.ylabel
+                else:
+                    ylabel = 'Specific capacity [mAh/g]'
             
             self.axes[0].set(
                 title = 'Cycle life' if len(self.axes) != 1 else '',
@@ -158,7 +166,14 @@ class Plot:
 
         
         if self.all_in_one is True:
-            plt.legend()
+            plt.legend(loc = self.legend_location)
+
+        try:
+            if len(self.specific_cycles) < 9:
+                for ax in self.axes:
+                    ax.legend(loc = self.legend_location)
+        except Exception as e:
+            LOG.debug(f"Something wrong in plot.py draw(): {e}")
 
         # Save if True, If out path specified, save there.
         if save == True:
@@ -167,7 +182,7 @@ class Plot:
             savename = "CapRet"
             for label in labels:
                 savename += "_" + label"""
-            plt.savefig("ecdhfig.png", bbox_inches='tight')
+            plt.savefig("ecdhfig.png", bbox_inches='tight', dpi = 500)
         elif type(save) == str:
             plt.savefig(save, bbox_inches='tight')
 
@@ -262,7 +277,7 @@ class Plot:
             ax.set_title(f"{cellobj.name}")
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
-            ax.set_title("Cyclic Voltammograms")
+            ax.set_title(" ")# Cyclic Voltammograms
             
         #Placing it in a plot with correct colors
         self.insert_cycle_data(cellobj, ax, cellobj.CVdata)
@@ -283,7 +298,7 @@ class Plot:
             ax.set_title(f"{cellobj.name}")
         else:
             ax = self.axes[0] if self.qcplot is False else self.axes[1]
-            ax.set_title("Galvanostatic Cycling")
+            ax.set_title("") #Galvanostatic Cycling
             
         #Placing it in a plot with correct colors
         self.insert_cycle_data(cellobj, ax, cellobj.GCdata)
@@ -315,7 +330,8 @@ class Plot:
         else:
             numcyc = 0
 
-        if numcyc > 5 or Nc > 5: #Use colorbar if more than 4 cycles and no specific cycles.
+        if numcyc > 8 and Nc > 8: #Use colorbar if more than 4 cycles and no specific cycles.
+            LOG.debug(f"numcyc: {numcyc}, Nc: {Nc}")
             if cellobj.specific_cycles:
                 maxcyc = max(cellobj.specific_cycles)
                 for i,cycle in enumerate(data):
@@ -343,10 +359,14 @@ class Plot:
 
         else: #There are either specific cycles or <=5 cycles in the data
 
-            colorlist = self.colors
+            colorlist = ['tab:blue', 'tab:orange', 'tab:green', 'tab:red', 'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray', 'tab:olive', 'tab:cyan']
+            #colorlist = self.colors
             if cellobj.specific_cycles:
+                j = -1
+                customlabel = ["C/10", "C/5", "C/2", "C", "2C", "5C"]
                 for i,cycle in enumerate(data):
                     if i in cellobj.specific_cycles:
+                        j+=1
                         color = colorlist[0]
                         colorlist = colorlist[1:]
 
@@ -355,8 +375,9 @@ class Plot:
                             ax.plot(chg[0], chg[1], color = color, label = f"{cellobj.name} Cycle {i}") #This is the charge cycle
                         else:
                             ax.plot(chg[0], chg[1], color = color, label = "Cycle {}".format(i)) #This is the charge cycle
+                            #ax.plot(chg[0], chg[1], color = color, label = customlabel[j]) #This is the charge cycle with a custom label specified before this if
                         ax.plot(dchg[0], dchg[1], color = color) #1 is discharge
-            else:
+            else: # Is this actually ever triggered anymore with the new specific cycles with cycle ranges?
                 for i,cycle in enumerate(data):
 
                     color = colorlist[0]
@@ -396,7 +417,7 @@ class Plot:
         # Get subplot from main plotclass
         if self.all_in_one is False:
             ax = self.give_subplot()
-            ax.set_title("raw data: {}".format(os.path.basename(cellobj.fn)))
+            ax.set_title(cellobj.name)
             #Initiate twin ax
             ax2 = ax.twinx()
             #self.axes.append(ax2)
@@ -416,7 +437,7 @@ class Plot:
                 self.axtwinx = ax.twinx()
             ax2 = self.axtwinx
 
-            ax.set_title(self.suptitle)
+            ax.set_title(" ")
             
 
         #if specific cycles, then remove all other cycles

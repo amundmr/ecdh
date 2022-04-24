@@ -26,7 +26,7 @@ cfg_dict = {"settings": {
                 "dt":                   (10, "Maximum time which goes by unrecorded"),
                 "dv":                   (0.01, "Maximum voltage change which goes by unrecorded"),
                 "smooth_data":          (False, "removes outliers, new file saved at same location as input file"),
-                "print_capacities":      (False, "Will print the capacity of the plotted cycles within a potential range, can be false or list of tuples, eg: [(3.8, 4.5), (4.5, 5.0)]"),
+                "print_capacities":      (False, "Will print the capacity of the plotted cycles within a potential range, can be false or list of pairwise ranges, eg: [3.5, 4.5, 4.5, 5.0] does the analysis in the ranges 3.5V-4.5V and 4.5V-5.0V"),
                 }
             }
 

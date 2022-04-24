@@ -152,6 +152,7 @@ def read_txt(filepath):
 
     df = clean_df(df)
 
+
     return df
 
 def check_df(df):
@@ -164,7 +165,7 @@ def check_df(df):
 
 
     if df.experiment_mode == 1: #Then its GC
-        if df['cycle number'].eq(0).all() or df['cycle number'].max() < 20: #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
+        if df['cycle number'].eq(0).all() or df['cycle number'].max() < 100: #If all cycle numbers are 0, then maybe Z1 counter was not iterated properly.
             LOG.info("We only found one cycle in '{}', and suspect this to be false. Checking now if there should be more cycles.".format(df.name))
 
             #We fix this by counting our own cycles.
@@ -178,10 +179,10 @@ def check_df(df):
 
                 if current > 0:
                     sign = True
-                    df['charge'].at[i-1] = True
+                    df['charge'].at[i] = True
                 elif current < 0:
                     sign = False
-                    df['charge'].at[i-1] = False
+                    df['charge'].at[i] = False
                 
 
                 if prev_sign is False and sign is True:
@@ -212,10 +213,10 @@ def check_df(df):
 
                 if current > 0:
                     sign = True
-                    df['charge'].at[i-1] = True
+                    df['charge'].at[i] = True
                 elif current < 0:
                     sign = False
-                    df['charge'].at[i-1] = False
+                    df['charge'].at[i] = False
 
 
 
@@ -228,7 +229,7 @@ def clean_df(df):
     - Removes time-shifts occuring in the data
     """
 
-    ## Rolling Averagedf.rolling(window=5)['MA'].mean()
+    ## Rolling Average now to adress the 5 significant digit issue
     df["time/s"] = df.rolling(window=10, center = True, min_periods=1)["time/s"].mean()
 
 
