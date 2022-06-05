@@ -176,15 +176,18 @@ class Plot:
             LOG.debug(f"Something wrong in plot.py draw(): {e}")
 
         # Save if True, If out path specified, save there.
-        if save == True:
+        if save:
             """ Fix this sometime
             handles, labels = self.axes[0].get_legend_handles_labels()
             savename = "CapRet"
             for label in labels:
                 savename += "_" + label"""
-            plt.savefig("ecdhfig.png", bbox_inches='tight', dpi = 500)
-        elif type(save) == str:
-            plt.savefig(save, bbox_inches='tight')
+            if type(save) == str:
+                savename = save
+            else:
+                savename = "ecdhfig.png"
+            plt.savefig(savename, bbox_inches='tight', dpi = 600)
+
 
         if show == True:
             #plt.legend(loc='lower left')
