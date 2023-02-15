@@ -6,7 +6,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name = 'ecdh',
-    packages = ['ecdh'],
+    packages = ['ecdh', 'ecdh.readers'],
     include_package_data = True,
     version = '0.1.4',     # Remember to update on new version
     license='GNU General Public License v3.0',        
