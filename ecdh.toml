@@ -1,6 +1,7 @@
 # "Data path", "active mass" and "nickname" (set active mass to 1 if data is normalized with regards to active mass)
 files = [
 	["LICENSE.txt","1.0"],
+]
 
 [settings]
 qcplot = false                 # Wether or not to plot capacity vs cycles
