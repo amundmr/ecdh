@@ -1,4 +1,6 @@
-# ecdh - ElectroChemical Data Handling
+# [OBSOLETE] ecdh - ElectroChemical Data Handling
+
+**THIS PACKAGE HAS BEEN OBSOLETED IN FAVOUR OF [SciBatt](https://github.com/amundmr/SciBatt)**
 
 edch provides easy solutions for simple handling of electrochemical data. Most emphasis is so far put on how to display the data using matplotlib.
 
